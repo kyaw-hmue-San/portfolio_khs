@@ -241,8 +241,8 @@ export function Hero() {
               margin: "1.4rem auto 0",
             }}
           >
-            Software Engineering student building restaurant ordering and POS
-            tools with React, TypeScript, Node.js, and PostgreSQL.
+            Software Engineering student interested in building clean, useful
+            web applications and growing through real-world engineering work.
           </motion.p>
 
           {/* CTA buttons */}

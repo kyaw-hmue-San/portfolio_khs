@@ -149,8 +149,8 @@ export function Skills() {
               Skills
             </h2>
             <p style={{ fontFamily: "Inter, sans-serif", fontSize: "15px", color: "rgba(255,255,255,0.42)", lineHeight: 1.7, maxWidth: "520px" }}>
-              My current stack is shaped by the restaurant ordering system:
-              TypeScript frontends, Express APIs, relational data, and practical deployment work.
+              My current stack is shaped by coursework, personal projects, and
+              hands-on practice across frontend, backend, data, and deployment.
             </p>
           </div>
         </Reveal>

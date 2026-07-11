@@ -43,7 +43,7 @@ export function Footer() {
             </div>
             <p style={{ fontFamily: "Inter, sans-serif", fontSize: "13px", lineHeight: 1.62, color: "rgba(255,255,255,0.28)" }}>
               Software Engineering student at Mae Fah Luang University, Thailand.
-              Building restaurant ordering and POS tools with React, TypeScript, and Node.js.
+              Interested in thoughtful software, practical problem solving, and continuous learning.
             </p>
           </div>
 
@@ -80,7 +80,7 @@ export function Footer() {
               Back to top
             </button>
             <p style={{ fontFamily: "Inter, sans-serif", fontSize: "12px", color: "rgba(255,255,255,0.18)", textAlign: "right" }}>
-              Portfolio focused on engineering case studies
+              Portfolio focused on learning and practical software work
             </p>
           </div>
 
@@ -93,7 +93,7 @@ export function Footer() {
             © 2026 Kyaw Hmue San. All rights reserved.
           </p>
           <p style={{ fontFamily: "Inter, sans-serif", fontSize: "12px", color: "rgba(255,255,255,0.2)" }}>
-            Public portfolio only · No real order data submitted
+            Public portfolio · Personal projects and learning notes
           </p>
         </div>
       </div>

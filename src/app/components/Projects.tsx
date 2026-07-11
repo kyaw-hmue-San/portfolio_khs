@@ -78,6 +78,7 @@ const PROJECTS: Project[] = [
     accent: "amber",
     icon: Layers,
     featured: true,
+    demoUrl: "https://anh-portfolio.onrender.com",
   },
   {
     id: "cosmiccraft",
@@ -196,6 +197,8 @@ const PROJECTS: Project[] = [
     },
     accent: "violet",
     icon: Smartphone,
+    demoUrl: "https://anchor-2914.web.app/",
+    sourceUrl: "https://github.com/kyaw-hmue-San/anchor_mobile",
   },
 ];
 
