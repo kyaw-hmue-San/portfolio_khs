@@ -9,7 +9,6 @@ function scrollTo(id: string) {
     window.scrollTo({ top, behavior: "smooth" });
   }
 }
-
 function OrbitDot({ angle, radius, delay, size = 3, color = "rgba(245,158,11,0.5)" }: {
   angle: number; radius: number; delay: number; size?: number; color?: string;
 }) {
@@ -46,6 +45,8 @@ export function Hero() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     let w = 0, h = 0, animId = 0;
     const particles: { x: number; y: number; vx: number; vy: number; a: number; va: number; r: number }[] = [];
@@ -100,9 +101,17 @@ export function Hero() {
 
     resize();
     init();
-    draw();
+    if (reduceMotion.matches) {
+      ctx.clearRect(0, 0, w, h);
+    } else {
+      draw();
+    }
 
-    const ro = new ResizeObserver(() => { resize(); init(); });
+    const ro = new ResizeObserver(() => {
+      resize();
+      init();
+      if (reduceMotion.matches) ctx.clearRect(0, 0, w, h);
+    });
     ro.observe(canvas);
     return () => { cancelAnimationFrame(animId); ro.disconnect(); };
   }, []);

@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { CheckCircle2, Database, GitBranch, Layout, Server } from "lucide-react";
+import { CheckCircle2, MapPin } from "lucide-react";
 
 function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   return (
@@ -31,17 +31,10 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 const PRINCIPLES = [
-  "I start from the real workflow before choosing the UI or database shape.",
-  "I prefer explicit data ownership over clever state that becomes hard to debug.",
-  "I design interfaces around the person using the system, not around screenshots.",
-  "I keep learning by turning unclear parts of a project into smaller, testable decisions.",
-];
-
-const SYSTEM_POINTS = [
-  { Icon: GitBranch, label: "Flow", text: "Map the user action to backend state." },
-  { Icon: Database, label: "Data", text: "Model relationships before screens grow." },
-  { Icon: Server, label: "Runtime", text: "Keep config and deployment assumptions visible." },
-  { Icon: Layout, label: "Interface", text: "Make repeated work fast and understandable." },
+  "Understand the user's workflow before choosing the technology.",
+  "Keep data models and API contracts clear and predictable.",
+  "Build interfaces that make everyday tasks easier.",
+  "Break unfamiliar problems into small steps I can test and improve.",
 ];
 
 export function EngineeringPhilosophy() {
@@ -64,43 +57,28 @@ export function EngineeringPhilosophy() {
           </div>
         </Reveal>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.25fr] gap-10 lg:gap-16 items-center">
-          <Reveal delay={0.05}>
-            <div
-              className="rounded-3xl p-6 relative overflow-hidden"
-              style={{
-                border: "1px solid rgba(245,158,11,0.16)",
-                background: "radial-gradient(ellipse 85% 70% at 0% 0%, rgba(245,158,11,0.08), transparent 65%), rgba(255,255,255,0.02)",
-                boxShadow: "0 28px 80px rgba(0,0,0,0.28)",
-              }}
-            >
-              <div className="grid grid-cols-2 gap-3">
-                {SYSTEM_POINTS.map(({ Icon, label, text }, index) => (
-                  <motion.div
-                    key={label}
-                    initial={{ opacity: 0, y: 14 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.42, delay: 0.1 + index * 0.05 }}
-                    className="rounded-2xl p-4 min-h-[130px]"
-                    style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(0,0,0,0.16)" }}
-                  >
-                    <Icon size={18} style={{ color: "rgba(251,191,36,0.82)", marginBottom: "18px" }} />
-                    <p style={{ fontFamily: "Inter, sans-serif", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,0.82)", marginBottom: "6px" }}>
-                      {label}
-                    </p>
-                    <p style={{ fontFamily: "Inter, sans-serif", fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
-                      {text}
-                    </p>
-                  </motion.div>
-                ))}
+        <div className="about-philosophy-layout">
+          <Reveal delay={0.05} className="about-portrait-reveal">
+            <figure className="about-portrait">
+              <div className="about-portrait-frame">
+                <img
+                  src="/about/kyaw-portrait.webp"
+                  alt="Kyaw Hmue San relaxing outdoors in Chiang Rai"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div className="about-portrait-glow" aria-hidden="true" />
+                <figcaption className="about-portrait-caption">
+                  <span><MapPin size={13} aria-hidden="true" /> Based in</span>
+                  <strong>Chiang Rai, Thailand</strong>
+                </figcaption>
               </div>
-            </div>
+            </figure>
           </Reveal>
 
           <Reveal delay={0.12}>
             <div className="flex flex-col gap-5">
-              <SectionLabel>Engineering Philosophy</SectionLabel>
+              <SectionLabel>How I Build</SectionLabel>
               <div>
                 <h3 style={{
                   fontFamily: "'Playfair Display', serif",
@@ -118,15 +96,14 @@ export function EngineeringPhilosophy() {
               </div>
 
               <p style={{ fontFamily: "Inter, sans-serif", fontSize: "15.5px", lineHeight: 1.82, color: "rgba(255,255,255,0.52)", maxWidth: "650px" }}>
-                I approach software as a system of tradeoffs. Before building screens,
-                I try to understand the workflow, the data that needs to stay reliable,
-                and the failure cases that would make the product frustrating to use.
+                I enjoy building software that solves clear, practical problems. Before I
+                start coding, I try to understand who will use the product, how information
+                moves through it, and what could make the experience confusing.
               </p>
               <p style={{ fontFamily: "Inter, sans-serif", fontSize: "15.5px", lineHeight: 1.82, color: "rgba(255,255,255,0.48)", maxWidth: "650px" }}>
-                I care about maintainable boundaries: clear API contracts, thoughtful
-                database relationships, predictable state, and interfaces that reduce
-                repeated work for real users. My projects are where I practice turning
-                messy requirements into smaller decisions I can test, explain, and improve.
+                I like working across both frontend and backend—from designing interfaces
+                to shaping APIs and database models. Every project gives me a chance to turn
+                an idea into useful features, learn from feedback, and improve how I build.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">

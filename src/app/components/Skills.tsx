@@ -1,239 +1,153 @@
+import { useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import { motion } from "motion/react";
 
-function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.56, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
-      className={className}
-    >
+    <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.52, delay, ease: [0.21, 0.47, 0.32, 0.98] }} className={className}>
       {children}
     </motion.div>
   );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+const TECH_KEYS = [
+  { name: "React", icon: "/tech_svgs/react.svg", color: "#61dafb", context: "Web interfaces and application state", projects: "Ahnyar House · E-Learning System" },
+  { name: "TypeScript", icon: "/tech_svgs/typescript.svg", color: "#3178c6", context: "Primary language across full-stack and mobile work", projects: "Ahnyar House · CosmicCraft · Anchor Mobile" },
+  { name: "JavaScript", icon: "/tech_svgs/javascript.svg", color: "#f7df1e", context: "Interactive web foundations and application logic", projects: "Portfolio and web projects" },
+  { name: "Next.js", icon: "/tech_svgs/nextjs.svg", color: "#f5f5f5", context: "Full-stack React applications and routed experiences", projects: "CosmicCraft" },
+  { name: "Node.js", icon: "/tech_svgs/nodejs.svg", color: "#68a063", context: "Server-side JavaScript services and tooling", projects: "Full-stack applications" },
+  { name: "Express", icon: "/tech_svgs/express.svg", color: "#d1d5db", context: "REST APIs, middleware, and backend routing", projects: "Ahnyar House" },
+  { name: "PostgreSQL", icon: "/tech_svgs/postgresql.svg", color: "#4f8fca", context: "Relational modeling and production data", projects: "Ahnyar House" },
+  { name: "MongoDB", icon: "/tech_svgs/mongodb.svg", color: "#47a248", context: "Document data for flexible application features", projects: "CosmicCraft" },
+  { name: "Java", icon: "/tech_svgs/java.svg", color: "#ed8b00", context: "Object-oriented development and backend coursework", projects: "E-Learning System" },
+  { name: "Spring Boot", icon: "/tech_svgs/springboot.svg", color: "#6db33f", context: "Structured Java services and REST APIs", projects: "E-Learning System" },
+  { name: "Tailwind CSS", icon: "/tech_svgs/tailwindcss.svg", color: "#38bdf8", context: "Responsive interfaces and reusable visual systems", projects: "Web applications" },
+  { name: "React Native", icon: "/tech_svgs/reactnative.svg", color: "#61dafb", context: "Cross-platform mobile application development", projects: "Anchor Mobile" },
+  { name: "GitHub", icon: "/tech_svgs/github.svg", color: "#f3f4f6", context: "Version control, collaboration, and project delivery", projects: "Across my development workflow" },
+  { name: "Docker", icon: "/tech_svgs/docker.svg", color: "#2496ed", context: "Consistent environments and deployment preparation", projects: "E-Learning System" },
+  { name: "QGIS", icon: "/tech_svgs/qgis.svg", color: "#93b023", context: "Map design, spatial data preparation, and analysis", projects: "Geospatial work · maps coming soon" },
+  { name: "SQL", icon: "/tech_svgs/sql.svg", color: "#60a5fa", context: "Queries, relational thinking, and data exploration", projects: "Ahnyar House · E-Learning System" },
+];
+
+const LEARNING = [
+  { title: "System Design", note: "Designing scalable services, boundaries, and reliable data flows." },
+  { title: "Automated Testing", note: "Building confidence with focused unit, integration, and UI tests." },
+  { title: "CI/CD", note: "Improving repeatable builds, checks, and production deployment workflows." },
+  { title: "AI Integration & RAG", note: "Creating useful AI features grounded in trusted application data." },
+];
+
+function TechBoard() {
+  const [active, setActive] = useState(TECH_KEYS[0]);
+  const boardRef = useRef<HTMLDivElement>(null);
+
+  const moveBoard = (event: MouseEvent<HTMLDivElement>) => {
+    const board = boardRef.current;
+    if (!board || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const bounds = board.getBoundingClientRect();
+    const pointerX = event.clientX - bounds.left;
+    const pointerY = event.clientY - bounds.top;
+    const normalizedX = pointerX / bounds.width - 0.5;
+    const normalizedY = pointerY / bounds.height - 0.5;
+
+    board.style.setProperty("--board-tilt-x", `${normalizedY * -3}deg`);
+    board.style.setProperty("--board-tilt-y", `${normalizedX * 4}deg`);
+    board.style.setProperty("--light-x", `${pointerX}px`);
+    board.style.setProperty("--light-y", `${pointerY}px`);
+
+    board.querySelectorAll<HTMLElement>(".tech-key").forEach((key) => {
+      const keyBounds = key.getBoundingClientRect();
+      const deltaX = event.clientX - (keyBounds.left + keyBounds.width / 2);
+      const deltaY = event.clientY - (keyBounds.top + keyBounds.height / 2);
+      const distance = Math.hypot(deltaX, deltaY);
+      const strength = Math.max(0, 1 - distance / 170);
+      key.style.setProperty("--magnet-x", `${deltaX * strength * 0.065}px`);
+      key.style.setProperty("--magnet-y", `${deltaY * strength * 0.065}px`);
+    });
+  };
+
+  const resetBoard = () => {
+    const board = boardRef.current;
+    if (!board) return;
+    board.style.setProperty("--board-tilt-x", "0deg");
+    board.style.setProperty("--board-tilt-y", "0deg");
+    board.querySelectorAll<HTMLElement>(".tech-key").forEach((key) => {
+      key.style.setProperty("--magnet-x", "0px");
+      key.style.setProperty("--magnet-y", "0px");
+    });
+  };
+
   return (
-    <span style={{
-      fontFamily: "Inter, sans-serif",
-      fontSize: "11px",
-      fontWeight: 600,
-      letterSpacing: "0.14em",
-      textTransform: "uppercase",
-      color: "rgba(245,158,11,0.65)",
-    }}>
-      {children}
-    </span>
+    <div className="tech-board-shell" ref={boardRef} onMouseMove={moveBoard} onMouseLeave={resetBoard}>
+      <p className="tech-board-hint">Hover, focus, or tap a key</p>
+      <div className="tech-board-layout">
+        <div className="tech-keyboard" aria-label="Interactive technology toolkit">
+          {TECH_KEYS.map((tech) => (
+            <button
+              key={tech.name}
+              type="button"
+              className={`tech-key ${active.name === tech.name ? "is-selected" : ""}`}
+              style={{ "--key-accent": tech.color } as CSSProperties}
+              aria-label={`${tech.name}: ${tech.context}`}
+              aria-pressed={active.name === tech.name}
+              onMouseEnter={() => setActive(tech)}
+              onFocus={() => setActive(tech)}
+              onClick={() => setActive(tech)}
+            >
+              <span className="tech-key-face">
+                <img className="tech-key-icon" src={tech.icon} alt="" aria-hidden="true" />
+                <span className="tech-key-name">{tech.name}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+        <aside className="tech-info-panel" aria-live="polite">
+          <span className="tech-info-icon" style={{ "--key-accent": active.color } as CSSProperties}>
+            <img src={active.icon} alt="" aria-hidden="true" />
+          </span>
+          <div>
+            <p className="tech-info-label">Selected technology</p>
+            <h3>{active.name}</h3>
+            <p>{active.context}</p>
+            <span>{active.projects}</span>
+          </div>
+        </aside>
+      </div>
+    </div>
   );
 }
 
-interface Skill { name: string; proficiency: number; note?: string }
-interface Category { label: string; color: string; colorDim: string; skills: Skill[] }
-
-const CATEGORIES: Category[] = [
-  {
-    label: "Languages",
-    color: "#f59e0b",
-    colorDim: "rgba(245,158,11,0.15)",
-    skills: [
-      { name: "TypeScript", proficiency: 85, note: "primary language" },
-      { name: "JavaScript", proficiency: 85 },
-      { name: "Java", proficiency: 60, note: "coursework" },
-      { name: "SQL", proficiency: 78 },
-      { name: "C / C++", proficiency: 45, note: "fundamentals" },
-    ],
-  },
-  {
-    label: "Frontend",
-    color: "#10b981",
-    colorDim: "rgba(16,185,129,0.15)",
-    skills: [
-      { name: "React", proficiency: 82 },
-      { name: "Vite", proficiency: 78 },
-      { name: "Next.js", proficiency: 70 },
-      { name: "Tailwind CSS", proficiency: 88 },
-      { name: "React Native", proficiency: 68 },
-      { name: "HTML & CSS", proficiency: 74, note: "strong foundation" },
-      { name: "Responsive Design", proficiency: 84 },
-    ],
-  },
-  {
-    label: "Backend & Data",
-    color: "#3b82f6",
-    colorDim: "rgba(59,130,246,0.15)",
-    skills: [
-      { name: "Node.js / Express", proficiency: 78 },
-      { name: "Spring Boot", proficiency: 62 },
-      { name: "PostgreSQL", proficiency: 72 },
-      { name: "MySQL", proficiency: 70 },
-      { name: "Prisma ORM", proficiency: 70 },
-      { name: "REST API Design", proficiency: 80 },
-      { name: "MongoDB", proficiency: 64 },
-      { name: "Firebase", proficiency: 66 },
-    ],
-  },
-  {
-    label: "Tooling & Infra",
-    color: "#8b5cf6",
-    colorDim: "rgba(139,92,246,0.15)",
-    skills: [
-      { name: "Git & GitHub", proficiency: 84 },
-      { name: "Docker", proficiency: 62 },
-      { name: "DigitalOcean", proficiency: 60 },
-      { name: "Linux / CLI", proficiency: 72 },
-      { name: "Socket.io", proficiency: 60 },
-      { name: "JWT Auth", proficiency: 65 },
-      { name: "Capacitor Android", proficiency: 58 },
-      { name: "Expo", proficiency: 64 },
-      { name: "OpenAI API", proficiency: 62 },
-    ],
-  },
-];
-
-const CURRENTLY_EXPLORING = [
-  { name: "System design", color: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.2)", text: "rgba(251,191,36,0.75)" },
-  { name: "Testing strategy", color: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.2)", text: "rgba(251,191,36,0.75)" },
-  { name: "Deployment workflow", color: "rgba(16,185,129,0.1)", border: "rgba(16,185,129,0.2)", text: "rgba(52,211,153,0.75)" },
-  { name: "Mobile app packaging", color: "rgba(16,185,129,0.1)", border: "rgba(16,185,129,0.2)", text: "rgba(52,211,153,0.75)" },
-  { name: "Restaurant operations UX", color: "rgba(59,130,246,0.1)", border: "rgba(59,130,246,0.2)", text: "rgba(147,197,253,0.75)" },
-];
-
-function SkillRow({ skill, color, i }: { skill: Skill; color: string; i: number }) {
+function LearningCarousel() {
   return (
-    <div className="grid grid-cols-[112px_1fr_auto] items-center gap-3">
-      <span
-        className="text-right"
-        style={{
-          fontFamily: "Inter, sans-serif",
-          fontSize: "12px",
-          color: "rgba(255,255,255,0.52)",
-        }}
-      >
-        {skill.name}
-      </span>
-      <div className="h-[3px] rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
-        <motion.div
-          className="h-full rounded-full"
-          initial={{ width: 0 }}
-          whileInView={{ width: `${skill.proficiency}%` }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.75, delay: 0.04 * i, ease: [0.21, 0.47, 0.32, 0.98] }}
-          style={{ background: color }}
-        />
+    <div className="learning-orbit" aria-labelledby="learning-orbit-title">
+      <div className="learning-orbit-heading">
+        <span className="learning-orbit-status" aria-hidden="true" />
+        <div>
+          <h3 id="learning-orbit-title">Currently Deepening</h3>
+          <p>Skills actively moving forward</p>
+        </div>
       </div>
-      <span
-        className="hidden sm:block"
-        style={{
-          fontFamily: "Inter, sans-serif",
-          fontSize: "10px",
-          color: "rgba(255,255,255,0.18)",
-          width: "86px",
-        }}
-      >
-        {skill.note ?? ""}
-      </span>
+      <div className="learning-orbit-scene">
+        <div className="learning-orbit-ring">
+          {LEARNING.map((item, index) => (
+            <article key={item.title} className="learning-orbit-card" tabIndex={0} style={{ "--card-angle": `${index * 90}deg` } as CSSProperties}>
+              <span className="learning-orbit-number">0{index + 1}</span>
+              <h4>{item.title}</h4>
+              <p>{item.note}</p>
+            </article>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
 export function Skills() {
   return (
-    <section id="skills" className="py-28 px-6">
+    <section id="skills" className="py-24 sm:py-28 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
-        <Reveal>
-          <div className="flex flex-col gap-3 mb-12">
-            <SectionLabel>Capabilities</SectionLabel>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(2rem, 5vw, 2.8rem)", fontWeight: 700, color: "rgba(255,255,255,0.93)", lineHeight: 1.12 }}>
-              Skills
-            </h2>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: "15px", color: "rgba(255,255,255,0.42)", lineHeight: 1.7, maxWidth: "520px" }}>
-              My current stack is shaped by coursework, personal projects, and
-              hands-on practice across frontend, backend, data, and deployment.
-            </p>
-          </div>
-        </Reveal>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-          {CATEGORIES.map((cat, ci) => (
-            <Reveal key={cat.label} delay={ci * 0.06}>
-              <div
-                className="rounded-2xl p-6 flex flex-col gap-5"
-                style={{
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  background: "rgba(255,255,255,0.02)",
-                }}
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="w-1.5 h-5 rounded-full" style={{ background: cat.color, opacity: 0.85 }} />
-                  <span style={{
-                    fontFamily: "Inter, sans-serif",
-                    fontSize: "11px",
-                    fontWeight: 700,
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    color: cat.color,
-                    opacity: 0.82,
-                  }}>
-                    {cat.label}
-                  </span>
-                </div>
-                <div className="flex flex-col gap-3">
-                  {cat.skills.map((s, i) => (
-                    <SkillRow key={s.name} skill={s} color={cat.color} i={i} />
-                  ))}
-                </div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-
-        <Reveal delay={0.25}>
-          <div
-            className="rounded-2xl p-6"
-            style={{
-              border: "1px solid rgba(255,255,255,0.07)",
-              background: "rgba(255,255,255,0.015)",
-            }}
-          >
-            <div className="flex items-center gap-3 mb-5">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-              </span>
-              <span style={{
-                fontFamily: "Inter, sans-serif",
-                fontSize: "11px",
-                fontWeight: 700,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "rgba(52,211,153,0.6)",
-              }}>
-                Currently exploring
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {CURRENTLY_EXPLORING.map((item) => (
-                <span
-                  key={item.name}
-                  style={{
-                    fontFamily: "Inter, sans-serif",
-                    fontSize: "12px",
-                    fontWeight: 520,
-                    background: item.color,
-                    border: `1px solid ${item.border}`,
-                    color: item.text,
-                    borderRadius: "8px",
-                    padding: "5px 10px",
-                  }}
-                >
-                  {item.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        </Reveal>
+        <Reveal><header className="flex flex-col gap-3 mb-9"><span style={{ fontFamily: "Inter, sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(245,158,11,0.65)" }}>Capabilities</span><h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(2rem, 5vw, 2.8rem)", fontWeight: 700, color: "rgba(255,255,255,0.93)", lineHeight: 1.12 }}>Skills</h2><p style={{ fontFamily: "Inter, sans-serif", fontSize: "15px", color: "rgba(255,255,255,0.42)", lineHeight: 1.7, maxWidth: "620px" }}>Technologies I use to turn ideas into web, mobile, backend, data, and geospatial work.</p></header></Reveal>
+        <Reveal delay={0.08}><TechBoard /></Reveal>
+        <Reveal delay={0.16} className="mt-10"><LearningCarousel /></Reveal>
       </div>
     </section>
   );

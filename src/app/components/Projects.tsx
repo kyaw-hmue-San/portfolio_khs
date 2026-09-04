@@ -1,12 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ElementType, ReactNode } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   ArrowUpRight,
+  ChevronLeft,
+  ChevronRight,
   ExternalLink,
   Github,
   GraduationCap,
   Layers,
+  LockKeyhole,
   Rocket,
   Smartphone,
   X,
@@ -34,10 +38,11 @@ interface Project {
   accent: Accent;
   icon: ElementType;
   featured?: boolean;
+  coverImage?: string;
+  coverAlt?: string;
   demoUrl?: string;
   sourceUrl?: string;
 }
-
 const PROJECTS: Project[] = [
   {
     id: "ahnyar-house",
@@ -78,6 +83,8 @@ const PROJECTS: Project[] = [
     accent: "amber",
     icon: Layers,
     featured: true,
+    coverImage: "/projects/ahnyar-house-preview.webp",
+    coverAlt: "Ahnyar House restaurant ordering interface shown on mobile devices",
     demoUrl: "https://anh-portfolio.onrender.com",
   },
   {
@@ -118,7 +125,8 @@ const PROJECTS: Project[] = [
     },
     accent: "emerald",
     icon: Rocket,
-    sourceUrl: "https://github.com/RizzRioo06/hackathon_CareerMate_AlcholicHut",
+    coverImage: "/projects/cosmiccraft-preview.webp",
+    coverAlt: "CosmicCraft AI Career Navigator welcome screen in a browser window",
   },
   {
     id: "lms",
@@ -158,6 +166,9 @@ const PROJECTS: Project[] = [
     },
     accent: "blue",
     icon: GraduationCap,
+    coverImage: "/projects/learnhub-preview.webp",
+    coverAlt: "LearnHub e-learning platform landing page in a browser window",
+    demoUrl: "https://lms-frontend-882950565528.us-central1.run.app/",
   },
   {
     id: "anchor-mobile",
@@ -197,8 +208,9 @@ const PROJECTS: Project[] = [
     },
     accent: "violet",
     icon: Smartphone,
+    coverImage: "/projects/anchor-preview-v2.webp",
+    coverAlt: "Anchor mobile app onboarding and settings screens shown on two phones",
     demoUrl: "https://anchor-2914.web.app/",
-    sourceUrl: "https://github.com/kyaw-hmue-San/anchor_mobile",
   },
 ];
 
@@ -236,20 +248,6 @@ const ACCENT = {
     iconBg: "rgba(139,92,246,0.1)",
   },
 };
-
-const SECTION_TITLES = [
-  "Overview",
-  "Problem",
-  "Solution",
-  "Architecture",
-  "Engineering Decisions",
-  "Challenges",
-  "My Contribution",
-  "Lessons Learned",
-  "Technologies",
-  "Screenshots or Diagrams",
-  "GitHub / Live Demo",
-];
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -319,46 +317,46 @@ function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; 
 }
 
 function ProjectActions({ project }: { project: Project }) {
+  const actionClass = "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all";
+  const actionStyle = {
+    fontFamily: "Inter, sans-serif",
+    fontSize: "12.5px",
+    border: "1px solid rgba(255,255,255,0.08)",
+  };
+
   return (
     <div className="flex flex-wrap gap-2">
-      <a
-        href={project.sourceUrl ?? "#"}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (!project.sourceUrl) e.preventDefault();
-        }}
-        target={project.sourceUrl ? "_blank" : undefined}
-        rel={project.sourceUrl ? "noreferrer" : undefined}
-        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all hover:bg-white/[0.04]"
-        style={{
-          fontFamily: "Inter, sans-serif",
-          fontSize: "12.5px",
-          color: project.sourceUrl ? "rgba(255,255,255,0.62)" : "rgba(255,255,255,0.28)",
-          border: "1px solid rgba(255,255,255,0.08)",
-        }}
-      >
-        <Github size={13} />
-        {project.sourceUrl ? "GitHub" : "Source Private"}
-      </a>
-      <a
-        href={project.demoUrl ?? "#"}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (!project.demoUrl) e.preventDefault();
-        }}
-        target={project.demoUrl ? "_blank" : undefined}
-        rel={project.demoUrl ? "noreferrer" : undefined}
-        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all hover:bg-white/[0.04]"
-        style={{
-          fontFamily: "Inter, sans-serif",
-          fontSize: "12.5px",
-          color: project.demoUrl ? "rgba(255,255,255,0.62)" : "rgba(255,255,255,0.28)",
-          border: "1px solid rgba(255,255,255,0.08)",
-        }}
-      >
-        <ExternalLink size={13} />
-        {project.demoUrl ? "Live Demo" : "Demo Private"}
-      </a>
+      {project.sourceUrl ? (
+        <a
+          href={project.sourceUrl}
+          onClick={(e) => e.stopPropagation()}
+          target="_blank"
+          rel="noreferrer"
+          className={`${actionClass} hover:bg-white/[0.04]`}
+          style={{ ...actionStyle, color: "rgba(255,255,255,0.62)" }}
+        >
+          <Github size={13} /> GitHub
+        </a>
+      ) : (
+        <span
+          className="inline-flex items-center gap-1.5 px-2 py-2"
+          style={{ fontFamily: "Inter, sans-serif", fontSize: "11.5px", color: "rgba(255,255,255,0.3)" }}
+        >
+          <LockKeyhole size={12} /> Private project
+        </span>
+      )}
+      {project.demoUrl && (
+        <a
+          href={project.demoUrl}
+          onClick={(e) => e.stopPropagation()}
+          target="_blank"
+          rel="noreferrer"
+          className={`${actionClass} hover:bg-white/[0.04]`}
+          style={{ ...actionStyle, color: "rgba(255,255,255,0.62)" }}
+        >
+          <ExternalLink size={13} /> Live demo
+        </a>
+      )}
     </div>
   );
 }
@@ -376,17 +374,41 @@ function ProjectCard({
   const Icon = project.icon;
 
   return (
-    <Reveal delay={delay}>
+    <Reveal delay={delay} className="h-full">
       <button
         type="button"
         onClick={onOpen}
-        className="group text-left rounded-2xl h-full w-full transition-all duration-300 hover:-translate-y-0.5 focus:outline-none"
+        className="project-card group text-left rounded-2xl h-full w-full transition-all duration-300 hover:-translate-y-0.5 focus:outline-none"
         style={{
           border: `1px solid ${project.featured ? a.border : "rgba(255,255,255,0.07)"}`,
           background: `radial-gradient(ellipse 85% 55% at 0% 0%, ${project.featured ? a.glow : "transparent"}, transparent 62%), rgba(255,255,255,0.02)`,
         }}
       >
-        <div className="p-6 flex flex-col gap-5 h-full">
+        <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-5 h-full">
+          <div
+            className={`project-card-visual ${project.coverImage ? "has-cover" : ""}`}
+            style={{
+              background: `radial-gradient(circle at 50% 42%, ${a.glow}, transparent 62%), rgba(255,255,255,0.018)`,
+              borderColor: project.featured ? a.border : "rgba(255,255,255,0.07)",
+            }}
+          >
+            <div className="project-card-mark">
+              <span style={{ background: a.iconBg, borderColor: a.border }}>
+                <Icon size={27} style={{ color: a.icon }} />
+              </span>
+              <p>{project.title}</p>
+              {project.coverImage && <small>Hover to preview</small>}
+            </div>
+            {project.coverImage && (
+              <img
+                className="project-card-image"
+                src={project.coverImage}
+                alt={project.coverAlt ?? `${project.title} preview`}
+                loading="lazy"
+              />
+            )}
+          </div>
+
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
               <span
@@ -427,7 +449,7 @@ function ProjectCard({
             />
           </div>
 
-          <p style={{
+          <p className="project-card-summary" style={{
             fontFamily: "Inter, sans-serif",
             fontSize: "13.5px",
             lineHeight: 1.65,
@@ -437,7 +459,7 @@ function ProjectCard({
           </p>
 
           <div className="flex flex-wrap gap-1.5 mt-auto">
-            {project.stack.slice(0, 6).map((tech) => (
+            {project.stack.slice(0, 5).map((tech) => (
               <span
                 key={tech}
                 style={{
@@ -456,7 +478,7 @@ function ProjectCard({
             ))}
           </div>
 
-          <div className="flex items-center justify-between gap-3 pt-1">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
             <ProjectActions project={project} />
             <span
               className="inline-flex transition-colors group-hover:text-white/70"
@@ -526,104 +548,22 @@ function CaseStudyContent({ project }: { project: Project }) {
 
   const blocks = useMemo(() => [
     {
-      title: "Overview",
-      content: <p>{project.sections.overview}</p>,
-    },
-    {
       title: "Problem",
       content: <p>{project.sections.problem}</p>,
     },
     {
-      title: "Solution",
-      content: <p>{project.sections.solution}</p>,
+      title: "Role",
+      content: <p>{project.sections.contribution}</p>,
     },
     {
       title: "Architecture",
       content: <p>{project.sections.architecture}</p>,
     },
     {
-      title: "Engineering Decisions",
-      content: (
-        <ul className="flex flex-col gap-2">
-          {project.sections.decisions.map((item) => (
-            <li key={item} className="flex gap-3">
-              <span className="w-1.5 h-1.5 rounded-full mt-[9px] shrink-0" style={{ background: a.dot }} />
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      ),
+      title: "Outcome",
+      content: <p>{project.sections.solution}</p>,
     },
-    {
-      title: "Challenges",
-      content: (
-        <ul className="flex flex-col gap-2">
-          {project.sections.challenges.map((item) => (
-            <li key={item} className="flex gap-3">
-              <span className="w-1.5 h-1.5 rounded-full mt-[9px] shrink-0" style={{ background: a.dot }} />
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      ),
-    },
-    {
-      title: "My Contribution",
-      content: <p>{project.sections.contribution}</p>,
-    },
-    {
-      title: "Lessons Learned",
-      content: <p>{project.sections.learned}</p>,
-    },
-    {
-      title: "Technologies",
-      content: (
-        <div className="flex flex-wrap gap-2">
-          {project.stack.map((tech) => (
-            <span
-              key={tech}
-              style={{
-                fontFamily: "Inter, sans-serif",
-                fontSize: "12px",
-                fontWeight: 550,
-                background: a.tag.bg,
-                border: `1px solid ${a.tag.border}`,
-                color: a.tag.color,
-                borderRadius: "7px",
-                padding: "5px 10px",
-              }}
-            >
-              {tech}
-            </span>
-          ))}
-        </div>
-      ),
-    },
-    {
-      title: "Screenshots or Diagrams",
-      content: (
-        <div className="grid grid-cols-1 gap-3">
-          {project.sections.visuals.map((item) => (
-            <div
-              key={item}
-              className="rounded-xl p-4"
-              style={{
-                border: "1px solid rgba(255,255,255,0.07)",
-                background: "rgba(0,0,0,0.16)",
-                color: "rgba(255,255,255,0.48)",
-              }}
-            >
-              {item}
-            </div>
-          ))}
-        </div>
-      ),
-    },
-    {
-      title: "GitHub / Live Demo",
-      content: <ProjectActions project={project} />,
-    },
-  ], [a.dot, a.tag.bg, a.tag.border, a.tag.color, project]);
+  ], [project]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -667,6 +607,29 @@ function CaseStudyContent({ project }: { project: Project }) {
       }}>
         {project.summary}
       </p>
+
+      <div className="flex flex-col gap-3 pb-1">
+        <div className="flex flex-wrap gap-2">
+          {project.stack.map((tech) => (
+            <span
+              key={tech}
+              style={{
+                fontFamily: "Inter, sans-serif",
+                fontSize: "11.5px",
+                fontWeight: 550,
+                background: a.tag.bg,
+                border: `1px solid ${a.tag.border}`,
+                color: a.tag.color,
+                borderRadius: "7px",
+                padding: "4px 9px",
+              }}
+            >
+              {tech}
+            </span>
+          ))}
+        </div>
+        <ProjectActions project={project} />
+      </div>
 
       {blocks.map((block, index) => (
         <DetailBlock key={`${project.id}-${block.title}`} title={`${index + 1}. ${block.title}`} index={index}>
@@ -721,7 +684,7 @@ function CaseStudyPanel({
             animate={isMobile ? { y: 0 } : { x: 0 }}
             exit={reduceMotion ? undefined : isMobile ? { y: "100%" } : { x: "100%" }}
             transition={{ duration: 0.34, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="absolute inset-0 md:inset-y-0 md:right-0 md:left-auto md:w-[min(900px,76vw)] overflow-hidden"
+            className="absolute inset-x-2 bottom-2 h-[min(88dvh,760px)] rounded-2xl md:rounded-none md:inset-y-0 md:right-0 md:left-auto md:w-[min(860px,72vw)] md:h-auto overflow-hidden"
             style={{
               background: "rgba(8,11,18,0.98)",
               borderLeft: isMobile ? "none" : "1px solid rgba(255,255,255,0.08)",
@@ -789,30 +752,9 @@ function CaseStudyPanel({
                   className="flex items-center justify-between gap-3 p-4 md:p-5"
                   style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
                 >
-                  <div className="md:hidden flex gap-2 overflow-x-auto pr-2">
-                    {PROJECTS.map((project) => {
-                      const active = project.id === selected.id;
-                      const a = ACCENT[project.accent];
-                      return (
-                        <button
-                          key={project.id}
-                          type="button"
-                          onClick={() => onSelect(project)}
-                          className="shrink-0 rounded-full px-3 py-1.5"
-                          style={{
-                            fontFamily: "Inter, sans-serif",
-                            fontSize: "11px",
-                            fontWeight: 650,
-                            border: active ? `1px solid ${a.border}` : "1px solid rgba(255,255,255,0.08)",
-                            color: active ? a.tag.color : "rgba(255,255,255,0.42)",
-                            background: active ? a.tag.bg : "rgba(255,255,255,0.02)",
-                          }}
-                        >
-                          {project.title}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <span className="md:hidden" style={{ fontFamily: "Inter, sans-serif", fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
+                    Project case study
+                  </span>
                   <span className="hidden md:block" style={{
                     fontFamily: "Inter, sans-serif",
                     fontSize: "11px",
@@ -831,7 +773,7 @@ function CaseStudyPanel({
                   </button>
                 </div>
 
-                <div className="overflow-y-auto p-5 md:p-8">
+                <div className="overflow-y-auto p-4 sm:p-5 md:p-8">
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={selected.id}
@@ -856,6 +798,23 @@ function CaseStudyPanel({
 export function Projects() {
   const [selected, setSelected] = useState<Project>(PROJECTS[0]);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [selectedSlide, setSelectedSlide] = useState(0);
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "center" });
+
+  const syncSlide = useCallback(() => {
+    if (emblaApi) setSelectedSlide(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    syncSlide();
+    emblaApi.on("select", syncSlide);
+    emblaApi.on("reInit", syncSlide);
+    return () => {
+      emblaApi.off("select", syncSlide);
+      emblaApi.off("reInit", syncSlide);
+    };
+  }, [emblaApi, syncSlide]);
 
   const openProject = (project: Project) => {
     setSelected(project);
@@ -863,10 +822,10 @@ export function Projects() {
   };
 
   return (
-    <section id="projects" className="py-28 px-6">
+    <section id="projects" className="py-24 sm:py-28 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
         <Reveal>
-          <div className="flex flex-col gap-3 mb-14">
+          <div className="flex flex-col gap-3 mb-10 sm:mb-14">
             <SectionLabel>Selected work</SectionLabel>
             <h2 style={{
               fontFamily: "'Playfair Display', serif",
@@ -890,36 +849,45 @@ export function Projects() {
           </div>
         </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-          {PROJECTS.map((project, index) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              delay={0.05 * index}
-              onOpen={() => openProject(project)}
-            />
-          ))}
-        </div>
+        <div className="project-carousel" role="region" aria-roledescription="carousel" aria-label="Selected projects">
+          <div className="project-carousel-viewport" ref={emblaRef}>
+            <div className="project-carousel-track">
+              {PROJECTS.map((project, index) => (
+                <div
+                  className={`project-carousel-slide ${selectedSlide === index ? "is-active" : ""}`}
+                  key={project.id}
+                  role="group"
+                  aria-roledescription="slide"
+                  aria-label={`${index + 1} of ${PROJECTS.length}: ${project.title}`}
+                >
+                  <ProjectCard project={project} delay={0.04 * index} onOpen={() => openProject(project)} />
+                </div>
+              ))}
+            </div>
+          </div>
 
-        <Reveal delay={0.15}>
-          <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={() => openProject(PROJECTS[0])}
-              className="inline-flex items-center gap-1.5 group transition-colors"
-              style={{
-                fontFamily: "Inter, sans-serif",
-                fontSize: "13.5px",
-                color: "rgba(255,255,255,0.36)",
-              }}
-              onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.62)"}
-              onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.36)"}
-            >
-              Open Ahnyar House case study
-              <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          <div className="project-carousel-controls">
+            <button type="button" className="project-carousel-arrow" onClick={() => emblaApi?.scrollPrev()} aria-label="Previous project">
+              <ChevronLeft size={17} aria-hidden="true" />
+            </button>
+            <div className="project-carousel-dots" aria-label="Choose a project">
+              {PROJECTS.map((project, index) => (
+                <button
+                  key={project.id}
+                  type="button"
+                  className={`project-carousel-dot ${selectedSlide === index ? "is-active" : ""}`}
+                  onClick={() => emblaApi?.scrollTo(index)}
+                  aria-label={`Show ${project.title}`}
+                  aria-current={selectedSlide === index ? "true" : undefined}
+                />
+              ))}
+            </div>
+            <button type="button" className="project-carousel-arrow" onClick={() => emblaApi?.scrollNext()} aria-label="Next project">
+              <ChevronRight size={17} aria-hidden="true" />
             </button>
           </div>
-        </Reveal>
+        </div>
+
       </div>
 
       <CaseStudyPanel

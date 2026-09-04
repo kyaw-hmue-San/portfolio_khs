@@ -6,7 +6,6 @@ const NAV_ITEMS = [
   { label: "Projects", id: "projects" },
   { label: "Skills", id: "skills" },
   { label: "Education", id: "education" },
-  { label: "Resume", id: "resume" },
   { label: "Contact", id: "contact" },
 ];
 
@@ -18,7 +17,6 @@ function scrollTo(id: string) {
     window.scrollTo({ top, behavior: "smooth" });
   }
 }
-
 export function Navbar() {
   const [elevated, setElevated] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -78,6 +76,7 @@ export function Navbar() {
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
               className="flex items-center gap-3 group focus:outline-none"
+              aria-label="Back to top"
             >
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105"
@@ -106,6 +105,7 @@ export function Navbar() {
                 <button
                   key={item.id}
                   onClick={() => scrollTo(item.id)}
+                  aria-current={active === item.id ? "location" : undefined}
                   className="relative px-3.5 py-2 rounded-lg transition-colors duration-150 focus:outline-none"
                   style={{
                     fontFamily: "Inter, sans-serif",
@@ -154,7 +154,9 @@ export function Navbar() {
               <button
                 className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg border border-white/8 text-white/50 hover:text-white/80 hover:border-white/16 transition-colors focus:outline-none"
                 onClick={() => setOpen((v) => !v)}
-                aria-label="Toggle menu"
+                aria-label={open ? "Close navigation menu" : "Open navigation menu"}
+                aria-expanded={open}
+                aria-controls="mobile-navigation"
               >
                 {open ? <X size={17} /> : <Menu size={17} />}
               </button>
@@ -168,6 +170,7 @@ export function Navbar() {
         {open && (
           <motion.div
             key="mobile-menu"
+            id="mobile-navigation"
             initial={{ opacity: 0, y: -12, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
