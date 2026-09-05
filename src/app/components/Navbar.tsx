@@ -76,7 +76,7 @@ export function Navbar() {
             boxShadow: elevated ? "0 1px 40px rgba(0,0,0,0.4)" : "none",
           }}
         >
-          <div className="max-w-6xl mx-auto px-6 h-[68px] flex items-center justify-between">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 h-[68px] flex items-center justify-between gap-3">
             {/* Logo */}
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
@@ -94,7 +94,7 @@ export function Navbar() {
                   K
                 </span>
               </div>
-              <div className="hidden sm:block">
+              <div className="hidden xl:block text-left">
                 <p style={{ fontFamily: "var(--portfolio-font-sans)", fontSize: "14px", fontWeight: 600, color: "var(--portfolio-text-strong)", lineHeight: 1 }}>
                   {t("common.name")}
                 </p>
@@ -105,7 +105,7 @@ export function Navbar() {
             </button>
 
             {/* Desktop nav */}
-            <nav className="hidden md:flex items-center gap-0.5">
+            <nav className="hidden lg:flex items-center gap-0.5">
               {NAV_ITEMS.map((item) => (
                 <button
                   key={item.id}
@@ -141,7 +141,7 @@ export function Navbar() {
             </nav>
 
             {/* CTA + hamburger */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className="portfolio-nav-preferences">
                 <button
                   type="button"
@@ -173,7 +173,7 @@ export function Navbar() {
               </div>
               <button
                 onClick={() => scrollTo("contact")}
-                className="hidden md:inline-flex items-center px-4 py-2 rounded-lg transition-all duration-200 hover:scale-[1.02] focus:outline-none"
+                className="inline-flex shrink-0 items-center justify-center gap-2 h-9 px-3 sm:px-4 whitespace-nowrap rounded-lg transition-all duration-200 hover:scale-[1.02] focus:outline-none"
                 style={{
                   fontFamily: "var(--portfolio-font-sans)",
                   fontSize: "13px",
@@ -186,7 +186,7 @@ export function Navbar() {
                 {t("common.hireMe")}
               </button>
               <button
-                className="portfolio-icon-button md:hidden w-9 h-9 flex items-center justify-center rounded-lg transition-colors focus:outline-none"
+                className="portfolio-icon-button lg:hidden w-9 h-9 flex items-center justify-center rounded-lg transition-colors focus:outline-none"
                 onClick={() => setOpen((v) => !v)}
                 aria-label={open ? t("common.closeMenu") : t("common.openMenu")}
                 aria-expanded={open}
@@ -209,7 +209,7 @@ export function Navbar() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
-            className="fixed top-[76px] inset-x-4 z-50 rounded-2xl overflow-hidden md:hidden"
+            className="fixed top-[76px] inset-x-4 z-50 rounded-2xl overflow-hidden lg:hidden"
             style={{
               background: "var(--portfolio-panel-bg)",
               border: "1px solid rgb(var(--portfolio-ink-rgb) / 0.08)",

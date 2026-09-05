@@ -142,3 +142,11 @@ Backend integration tests use isolated databases and local HTTP servers. They
 cover seeding, persistence, authentication, session expiry, CSRF/origin protection,
 draft visibility, publishing, deletion, conflicting edits, input validation,
 image uploads, login throttling, and production cookie settings.
+
+## Contact inquiry form
+
+The form posts to `/api/contact` on the same API server as the chat assistant. For a static frontend, its existing `VITE_CHAT_API_URL` must point to that server. Configure `PUBLIC_ORIGIN` to the frontend origin to allow cross-origin requests.
+
+Set `RESEND_API_KEY` and `CONTACT_FROM_EMAIL` on the API server (never in a `VITE_` variable). The sender must use a domain verified in Resend. The destination defaults to `kyawhmuesan@gmail.com`; optionally set `CONTACT_TO_EMAIL`. Restart the API after configuring it. See the [Resend send-email documentation](https://resend.com/docs/api-reference/emails/send-email).
+
+The endpoint validates fields, limits request sizes and frequency, and includes a spam honeypot. It reports success only after the delivery provider accepts the message. Without email configuration, visitors get an unavailable message and a direct email link. No inquiry messages are stored locally.

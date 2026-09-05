@@ -1,3 +1,4 @@
+import { deliverInquiry } from "./contact.mjs";
 import { openStore } from "./store.mjs";
 import { createCmsHandler } from "./cms.mjs";
 import { createReadStream } from "node:fs";
@@ -25,6 +26,7 @@ const MIME_TYPES = {
   ".ico": "image/x-icon",
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
+  ".pdf": "application/pdf",
   ".png": "image/png",
   ".svg": "image/svg+xml",
   ".webp": "image/webp",
@@ -214,7 +216,7 @@ async function serveStatic(request, response) {
 
   response.writeHead(200, {
     "Content-Type": MIME_TYPES[extname(filePath)] ?? "application/octet-stream",
-    "Cache-Control": filePath.endsWith("index.html") ? "no-cache" : "public, max-age=31536000, immutable",
+    "Cache-Control": (filePath.endsWith("index.html") || filePath.endsWith(".pdf")) ? "no-cache" : "public, max-age=31536000, immutable",
   });
   createReadStream(filePath).pipe(response);
 }
@@ -231,7 +233,7 @@ const server = createServer(async (request, response) => {
     response.setHeader("X-Frame-Options", "DENY");
   }
   if (handleCms && await handleCms(request, response, url.pathname)) return;
-  if (url.pathname === "/api/chat") {
+  if (["/api/chat", "/api/contact"].includes(url.pathname)) {
     const origin = request.headers.origin;
     if (origin && chatOrigin && origin !== chatOrigin) {
       json(response, 403, { error: "Request origin is not allowed." });
@@ -253,6 +255,21 @@ const server = createServer(async (request, response) => {
   }
   if (url.pathname === "/api/chat" && request.method === "POST") {
     await handleChat(request, response);
+    return;
+  }
+  if (url.pathname === "/api/contact" && request.method === "POST") {
+    const limit = rateLimit(`contact:${clientAddress(request)}`);
+    if (!limit.allowed) { json(response, 429, { error: "Too many inquiries. Please try again in a few minutes." }); return; }
+    try {
+      const result = await deliverInquiry(await readJson(request), {
+        apiKey: process.env.RESEND_API_KEY,
+        from: process.env.CONTACT_FROM_EMAIL,
+        to: process.env.CONTACT_TO_EMAIL || "kyawhmuesan@gmail.com",
+      });
+      json(response, result.status, result.body);
+    } catch (error) {
+      json(response, error.message === "BODY_TOO_LARGE" ? 413 : 400, { error: "Invalid inquiry. Please check the form and try again." });
+    }
     return;
   }
   if (url.pathname.startsWith("/api/")) {

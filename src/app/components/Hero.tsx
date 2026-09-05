@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { motion } from "motion/react";
-import { ArrowDown, MapPin, Sparkles } from "lucide-react";
+import { ArrowDown, Download, MapPin, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 function scrollTo(id: string) {
@@ -264,7 +264,7 @@ export function Hero() {
           >
             <button
               onClick={() => scrollTo("projects")}
-              className="group relative overflow-hidden px-7 py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              className="group relative overflow-hidden w-full sm:w-auto min-w-40 inline-flex items-center justify-center min-h-12 px-7 py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               style={{
                 fontFamily: "var(--portfolio-font-sans)",
                 fontSize: "14px",
@@ -276,9 +276,10 @@ export function Hero() {
             >
               {t("hero.work")}
             </button>
-            <button
-              onClick={() => scrollTo("contact")}
-              className="portfolio-secondary-button px-7 py-3.5 rounded-xl transition-all duration-200"
+            <a
+              href="/KyawHmueSan.pdf"
+              download="Kyaw-Hmue-San-Resume.pdf"
+              className="portfolio-secondary-button gap-2 w-full sm:w-auto min-w-40 inline-flex items-center justify-center min-h-12 px-7 py-3.5 rounded-xl transition-all duration-200"
               style={{
                 fontFamily: "var(--portfolio-font-sans)",
                 fontSize: "14px",
@@ -288,8 +289,9 @@ export function Hero() {
                 background: "transparent",
               }}
             >
-              {t("hero.contact")}
-            </button>
+              <Download size={16} aria-hidden="true" />
+              {t("common.getResume")}
+            </a>
           </motion.div>
 
           {/* Tech pills */}
