@@ -1,7 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import useEmblaCarousel from "embla-carousel-react";
-import { motion, useReducedMotion } from "motion/react";
-import { Braces, ChevronLeft, ChevronRight, Code2, Database, Map, Smartphone, Wrench } from "lucide-react";
+import { useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
+import { motion } from "motion/react";
 
 function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
   return (
@@ -11,183 +9,145 @@ function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; 
   );
 }
 
-interface SkillCategory {
-  label: string;
-  eyebrow: string;
-  description: string;
-  color: string;
-  background: string;
-  border: string;
-  icon: typeof Code2;
-  skills: string[];
-}
-
-const CATEGORIES: SkillCategory[] = [
-  {
-    label: "Languages & Foundations",
-    eyebrow: "Core development",
-    description: "The languages and web fundamentals behind my software projects and coursework.",
-    color: "#f59e0b",
-    background: "rgba(245,158,11,0.06)",
-    border: "rgba(245,158,11,0.2)",
-    icon: Braces,
-    skills: ["TypeScript", "JavaScript", "Java", "SQL", "HTML", "CSS"],
-  },
-  {
-    label: "Frontend & Mobile",
-    eyebrow: "User experiences",
-    description: "Responsive interfaces for the web and cross-platform mobile applications.",
-    color: "#10b981",
-    background: "rgba(16,185,129,0.055)",
-    border: "rgba(16,185,129,0.19)",
-    icon: Smartphone,
-    skills: ["React", "Next.js", "Tailwind CSS", "Responsive Design", "React Native", "Expo"],
-  },
-  {
-    label: "Backend & Databases",
-    eyebrow: "Systems & data",
-    description: "APIs, authentication, server-side applications, and persistent data storage.",
-    color: "#3b82f6",
-    background: "rgba(59,130,246,0.055)",
-    border: "rgba(59,130,246,0.19)",
-    icon: Database,
-    skills: ["Node.js", "Express", "Spring Boot", "REST APIs", "PostgreSQL", "MySQL", "MongoDB", "Prisma ORM", "Firebase", "JWT Authentication"],
-  },
-  {
-    label: "Data & Geospatial",
-    eyebrow: "Analysis & mapping",
-    description: "Foundational analysis and geographic communication using real datasets.",
-    color: "#8b5cf6",
-    background: "rgba(139,92,246,0.06)",
-    border: "rgba(139,92,246,0.2)",
-    icon: Map,
-    skills: ["QGIS", "Map Visualization", "Spatial Data Preparation", "Basic Spatial Analysis", "Data Cleaning", "Exploratory Data Analysis", "Data Visualization"],
-  },
+const TECH_KEYS = [
+  { name: "React", icon: "/tech_svgs/react.svg", color: "#61dafb", context: "Web interfaces and application state", projects: "Ahnyar House · E-Learning System" },
+  { name: "TypeScript", icon: "/tech_svgs/typescript.svg", color: "#3178c6", context: "Primary language across full-stack and mobile work", projects: "Ahnyar House · CosmicCraft · Anchor Mobile" },
+  { name: "JavaScript", icon: "/tech_svgs/javascript.svg", color: "#f7df1e", context: "Interactive web foundations and application logic", projects: "Portfolio and web projects" },
+  { name: "Next.js", icon: "/tech_svgs/nextjs.svg", color: "#f5f5f5", context: "Full-stack React applications and routed experiences", projects: "CosmicCraft" },
+  { name: "Node.js", icon: "/tech_svgs/nodejs.svg", color: "#68a063", context: "Server-side JavaScript services and tooling", projects: "Full-stack applications" },
+  { name: "Express", icon: "/tech_svgs/express.svg", color: "#d1d5db", context: "REST APIs, middleware, and backend routing", projects: "Ahnyar House" },
+  { name: "PostgreSQL", icon: "/tech_svgs/postgresql.svg", color: "#4f8fca", context: "Relational modeling and production data", projects: "Ahnyar House" },
+  { name: "MongoDB", icon: "/tech_svgs/mongodb.svg", color: "#47a248", context: "Document data for flexible application features", projects: "CosmicCraft" },
+  { name: "Java", icon: "/tech_svgs/java.svg", color: "#ed8b00", context: "Object-oriented development and backend coursework", projects: "E-Learning System" },
+  { name: "Spring Boot", icon: "/tech_svgs/springboot.svg", color: "#6db33f", context: "Structured Java services and REST APIs", projects: "E-Learning System" },
+  { name: "Tailwind CSS", icon: "/tech_svgs/tailwindcss.svg", color: "#38bdf8", context: "Responsive interfaces and reusable visual systems", projects: "Web applications" },
+  { name: "React Native", icon: "/tech_svgs/reactnative.svg", color: "#61dafb", context: "Cross-platform mobile application development", projects: "Anchor Mobile" },
+  { name: "GitHub", icon: "/tech_svgs/github.svg", color: "#f3f4f6", context: "Version control, collaboration, and project delivery", projects: "Across my development workflow" },
+  { name: "Docker", icon: "/tech_svgs/docker.svg", color: "#2496ed", context: "Consistent environments and deployment preparation", projects: "E-Learning System" },
+  { name: "QGIS", icon: "/tech_svgs/qgis.svg", color: "#93b023", context: "Map design, spatial data preparation, and analysis", projects: "Geospatial work · maps coming soon" },
+  { name: "SQL", icon: "/tech_svgs/sql.svg", color: "#60a5fa", context: "Queries, relational thinking, and data exploration", projects: "Ahnyar House · E-Learning System" },
 ];
 
-const TOOLS = ["Git & GitHub", "Docker", "DigitalOcean", "Linux / CLI", "Vite", "Socket.io", "OpenAI API"];
-const CURRENTLY_DEEPENING = ["System design", "Automated testing", "CI/CD & deployment", "AI integration & RAG"];
+const LEARNING = [
+  { title: "System Design", note: "Designing scalable services, boundaries, and reliable data flows." },
+  { title: "Automated Testing", note: "Building confidence with focused unit, integration, and UI tests." },
+  { title: "CI/CD", note: "Improving repeatable builds, checks, and production deployment workflows." },
+  { title: "AI Integration & RAG", note: "Creating useful AI features grounded in trusted application data." },
+];
 
-function SkillCard({ category, active }: { category: SkillCategory; active: boolean }) {
-  const Icon = category.icon;
+function TechBoard() {
+  const [active, setActive] = useState(TECH_KEYS[0]);
+  const boardRef = useRef<HTMLDivElement>(null);
+
+  const moveBoard = (event: MouseEvent<HTMLDivElement>) => {
+    const board = boardRef.current;
+    if (!board || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const bounds = board.getBoundingClientRect();
+    const pointerX = event.clientX - bounds.left;
+    const pointerY = event.clientY - bounds.top;
+    const normalizedX = pointerX / bounds.width - 0.5;
+    const normalizedY = pointerY / bounds.height - 0.5;
+
+    board.style.setProperty("--board-tilt-x", `${normalizedY * -3}deg`);
+    board.style.setProperty("--board-tilt-y", `${normalizedX * 4}deg`);
+    board.style.setProperty("--light-x", `${pointerX}px`);
+    board.style.setProperty("--light-y", `${pointerY}px`);
+
+    board.querySelectorAll<HTMLElement>(".tech-key").forEach((key) => {
+      const keyBounds = key.getBoundingClientRect();
+      const deltaX = event.clientX - (keyBounds.left + keyBounds.width / 2);
+      const deltaY = event.clientY - (keyBounds.top + keyBounds.height / 2);
+      const distance = Math.hypot(deltaX, deltaY);
+      const strength = Math.max(0, 1 - distance / 170);
+      key.style.setProperty("--magnet-x", `${deltaX * strength * 0.065}px`);
+      key.style.setProperty("--magnet-y", `${deltaY * strength * 0.065}px`);
+    });
+  };
+
+  const resetBoard = () => {
+    const board = boardRef.current;
+    if (!board) return;
+    board.style.setProperty("--board-tilt-x", "0deg");
+    board.style.setProperty("--board-tilt-y", "0deg");
+    board.querySelectorAll<HTMLElement>(".tech-key").forEach((key) => {
+      key.style.setProperty("--magnet-x", "0px");
+      key.style.setProperty("--magnet-y", "0px");
+    });
+  };
+
   return (
-    <article className={`skill-carousel-card h-full rounded-2xl p-5 sm:p-6 ${active ? "is-active" : ""}`} style={{ border: `1px solid ${category.border}`, background: category.background }}>
-      <div className="flex items-start justify-between gap-5 mb-5">
-        <div>
-          <span style={{ fontFamily: "Inter, sans-serif", fontSize: "10px", fontWeight: 700, letterSpacing: "0.13em", textTransform: "uppercase", color: category.color }}>{category.eyebrow}</span>
-          <h3 className="mt-2" style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.4rem, 3vw, 1.85rem)", fontWeight: 700, lineHeight: 1.2, color: "rgba(255,255,255,0.9)" }}>{category.label}</h3>
+    <div className="tech-board-shell" ref={boardRef} onMouseMove={moveBoard} onMouseLeave={resetBoard}>
+      <p className="tech-board-hint">Hover, focus, or tap a key</p>
+      <div className="tech-board-layout">
+        <div className="tech-keyboard" aria-label="Interactive technology toolkit">
+          {TECH_KEYS.map((tech) => (
+            <button
+              key={tech.name}
+              type="button"
+              className={`tech-key ${active.name === tech.name ? "is-selected" : ""}`}
+              style={{ "--key-accent": tech.color } as CSSProperties}
+              aria-label={`${tech.name}: ${tech.context}`}
+              aria-pressed={active.name === tech.name}
+              onMouseEnter={() => setActive(tech)}
+              onFocus={() => setActive(tech)}
+              onClick={() => setActive(tech)}
+            >
+              <span className="tech-key-face">
+                <img className="tech-key-icon" src={tech.icon} alt="" aria-hidden="true" />
+                <span className="tech-key-name">{tech.name}</span>
+              </span>
+            </button>
+          ))}
         </div>
-        <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.045)", border: `1px solid ${category.border}` }}>
-          <Icon size={19} aria-hidden="true" style={{ color: category.color }} />
-        </div>
+        <aside className="tech-info-panel" aria-live="polite">
+          <span className="tech-info-icon" style={{ "--key-accent": active.color } as CSSProperties}>
+            <img src={active.icon} alt="" aria-hidden="true" />
+          </span>
+          <div>
+            <p className="tech-info-label">Selected technology</p>
+            <h3>{active.name}</h3>
+            <p>{active.context}</p>
+            <span>{active.projects}</span>
+          </div>
+        </aside>
       </div>
-      <p className="mb-5" style={{ fontFamily: "Inter, sans-serif", fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.4)", maxWidth: "530px" }}>{category.description}</p>
-      <ul className="flex flex-wrap gap-2" aria-label={`${category.label} skills`}>
-        {category.skills.map((skill) => (
-          <li key={skill} className="rounded-lg px-3 py-2 transition-colors duration-200 hover:bg-white/[0.08]" style={{ fontFamily: "Inter, sans-serif", fontSize: "12.5px", fontWeight: 500, color: "rgba(255,255,255,0.61)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>{skill}</li>
-        ))}
-      </ul>
-    </article>
+    </div>
   );
 }
 
-function SupportingGroup({ title, items, learning = false }: { title: string; items: string[]; learning?: boolean }) {
+function LearningCarousel() {
   return (
-    <div className="h-full rounded-2xl p-5 sm:p-6" style={{ border: learning ? "1px solid rgba(16,185,129,0.15)" : "1px solid rgba(255,255,255,0.07)", background: learning ? "rgba(16,185,129,0.025)" : "rgba(255,255,255,0.015)" }}>
-      <div className="flex items-center gap-3 mb-5">
-        {learning ? (
-          <span className="relative flex h-2 w-2" aria-hidden="true"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50" /><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" /></span>
-        ) : <Wrench size={14} aria-hidden="true" style={{ color: "rgba(255,255,255,0.4)" }} />}
-        <h3 style={{ fontFamily: "Inter, sans-serif", fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: learning ? "rgba(52,211,153,0.65)" : "rgba(255,255,255,0.42)" }}>{title}</h3>
+    <div className="learning-orbit" aria-labelledby="learning-orbit-title">
+      <div className="learning-orbit-heading">
+        <span className="learning-orbit-status" aria-hidden="true" />
+        <div>
+          <h3 id="learning-orbit-title">Currently Deepening</h3>
+          <p>Skills actively moving forward</p>
+        </div>
       </div>
-      <ul className="flex flex-wrap gap-2" aria-label={title}>
-        {items.map((item) => (
-          <li key={item} className="rounded-lg px-3 py-2" style={{ fontFamily: "Inter, sans-serif", fontSize: "12.5px", fontWeight: 500, color: learning ? "rgba(52,211,153,0.74)" : "rgba(255,255,255,0.48)", background: learning ? "rgba(16,185,129,0.07)" : "transparent", border: learning ? "1px solid rgba(16,185,129,0.15)" : "1px solid rgba(255,255,255,0.07)" }}>{item}</li>
-        ))}
-      </ul>
+      <div className="learning-orbit-scene">
+        <div className="learning-orbit-ring">
+          {LEARNING.map((item, index) => (
+            <article key={item.title} className="learning-orbit-card" tabIndex={0} style={{ "--card-angle": `${index * 90}deg` } as CSSProperties}>
+              <span className="learning-orbit-number">0{index + 1}</span>
+              <h4>{item.title}</h4>
+              <p>{item.note}</p>
+            </article>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
 export function Skills() {
-  const reduceMotion = useReducedMotion();
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [interactionStopped, setInteractionStopped] = useState(false);
-  const pausedRef = useRef(false);
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "center" });
-
-  const syncSelection = useCallback(() => {
-    if (emblaApi) setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    syncSelection();
-    emblaApi.on("select", syncSelection);
-    emblaApi.on("reInit", syncSelection);
-    return () => {
-      emblaApi.off("select", syncSelection);
-      emblaApi.off("reInit", syncSelection);
-    };
-  }, [emblaApi, syncSelection]);
-
-  useEffect(() => {
-    if (!emblaApi || reduceMotion || interactionStopped) return;
-    const timer = window.setInterval(() => {
-      if (!pausedRef.current && !document.hidden) emblaApi.scrollNext();
-    }, 5200);
-    return () => window.clearInterval(timer);
-  }, [emblaApi, interactionStopped, reduceMotion]);
-
-  const useControls = (action: () => void) => {
-    setInteractionStopped(true);
-    action();
-  };
-
   return (
     <section id="skills" className="py-24 sm:py-28 px-4 sm:px-6">
-      <div className="max-w-6xl mx-auI to">
-        <Reveal>
-          <header className="flex flex-col gap-3 mb-10">
-            <span style={{ fontFamily: "Inter, sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(245,158,11,0.65)" }}>Capabilities</span>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(2rem, 5vw, 2.8rem)", fontWeight: 700, color: "rgba(255,255,255,0.93)", lineHeight: 1.12 }}>Skills</h2>
-            {/* <p style={{ fontFamily: "Inter, sans-serif", fontSize: "15px", color: "rgba(255,255,255,0.42)", lineHeight: 1.7, maxWidth: "640px" }}>A practical toolkit shaped by software projects, university coursework, and foundational work with data and geographic information systems.</p> */}
-          </header>
-        </Reveal>
-
-        <Reveal delay={0.08}>
-          <div className="skill-carousel" role="region" aria-roledescription="carousel" aria-label="Technical skill categories" onMouseEnter={() => { pausedRef.current = true; }} onMouseLeave={() => { pausedRef.current = false; }} onFocusCapture={() => { pausedRef.current = true; }} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) pausedRef.current = false; }} onPointerDown={() => { pausedRef.current = true; }} onPointerUp={() => { pausedRef.current = false; }}>
-            <div className="skill-carousel-viewport" ref={emblaRef}>
-              <div className="skill-carousel-track">
-                {CATEGORIES.map((category, index) => (
-                  <div className="skill-carousel-slide" key={category.label} role="group" aria-roledescription="slide" aria-label={`${index + 1} of ${CATEGORIES.length}: ${category.label}`} aria-hidden={selectedIndex !== index && !reduceMotion}>
-                    <SkillCard category={category} active={selectedIndex === index} />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="skill-carousel-controls mt-5 flex items-center justify-between gap-4">
-              <p className="hidden sm:block text-xs" style={{ color: "rgba(255,255,255,0.28)" }}>Swipe or use the controls to explore</p>
-              <div className="flex items-center gap-3 ml-auto">
-                <button type="button" className="skill-carousel-arrow" onClick={() => useControls(() => emblaApi?.scrollPrev())} aria-label="Previous skill category"><ChevronLeft size={17} aria-hidden="true" /></button>
-                <div className="flex items-center gap-2" aria-label="Choose a skill category">
-                  {CATEGORIES.map((category, index) => (
-                    <button key={category.label} type="button" className={`skill-carousel-dot ${selectedIndex === index ? "is-active" : ""}`} onClick={() => useControls(() => emblaApi?.scrollTo(index))} aria-label={`Show ${category.label}`} aria-current={selectedIndex === index ? "true" : undefined} />
-                  ))}
-                </div>
-                <button type="button" className="skill-carousel-arrow" onClick={() => useControls(() => emblaApi?.scrollNext())} aria-label="Next skill category"><ChevronRight size={17} aria-hidden="true" /></button>
-              </div>
-            </div>
-          </div>
-        </Reveal>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-8">
-          <Reveal delay={0.18} className="h-full"><SupportingGroup title="Tools I work with" items={TOOLS} /></Reveal>
-          <Reveal delay={0.23} className="h-full"><SupportingGroup title="Currently deepening" items={CURRENTLY_DEEPENING} learning /></Reveal>
-        </div>
-        {/* <Reveal delay={0.28}>
-          <p className="mt-5" style={{ fontFamily: "Inter, sans-serif", fontSize: "11.5px", color: "rgba(255,255,255,0.22)", lineHeight: 1.6 }}>Skills are grouped by hands-on use rather than subjective percentages. Project case studies—and future map work—provide the supporting evidence.</p>
-        </Reveal> */}
+      <div className="max-w-6xl mx-auto">
+        <Reveal><header className="flex flex-col gap-3 mb-9"><span style={{ fontFamily: "Inter, sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(245,158,11,0.65)" }}>Capabilities</span><h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(2rem, 5vw, 2.8rem)", fontWeight: 700, color: "rgba(255,255,255,0.93)", lineHeight: 1.12 }}>Skills</h2><p style={{ fontFamily: "Inter, sans-serif", fontSize: "15px", color: "rgba(255,255,255,0.42)", lineHeight: 1.7, maxWidth: "620px" }}>Technologies I use to turn ideas into web, mobile, backend, data, and geospatial work.</p></header></Reveal>
+        <Reveal delay={0.08}><TechBoard /></Reveal>
+        <Reveal delay={0.16} className="mt-10"><LearningCarousel /></Reveal>
       </div>
     </section>
   );
