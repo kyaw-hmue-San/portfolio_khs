@@ -29,10 +29,10 @@ const TECH_KEYS = [
 ];
 
 const LEARNING = [
-  { title: "System Design", note: "Designing scalable services, boundaries, and reliable data flows." },
-  { title: "Automated Testing", note: "Building confidence with focused unit, integration, and UI tests." },
-  { title: "CI/CD", note: "Improving repeatable builds, checks, and production deployment workflows." },
-  { title: "AI Integration & RAG", note: "Creating useful AI features grounded in trusted application data." },
+  { title: "System Design", note: "Planning how app components work together." },
+  { title: "Automated Testing", note: "Testing key features and catching bugs early." },
+  { title: "CI/CD", note: "Automating checks and deployments." },
+  { title: "AI & RAG", note: "Connecting AI answers to relevant data." },
 ];
 
 function TechBoard() {
@@ -118,18 +118,15 @@ function TechBoard() {
 
 function LearningContainer() {
   return (
-    <div className="learning-container" aria-labelledby="learning-orbit-title">
-      <div className="learning-orbit-heading">
-        <span className="learning-orbit-status" aria-hidden="true" />
+    <div className="learning-container" aria-labelledby="learning-title">
+      <div className="learning-heading">
         <div>
-          <h3 id="learning-orbit-title">Currently Deepening</h3>
-          <p>Skills actively moving forward</p>
+          <h3 id="learning-title">Currently learning</h3>
         </div>
       </div>
       <div className="learning-grid">
-        {LEARNING.map((item, index) => (
+        {LEARNING.map((item) => (
           <article key={item.title} className="learning-card">
-            <span className="learning-number">0{index + 1}</span>
             <h4>{item.title}</h4>
             <p>{item.note}</p>
           </article>
