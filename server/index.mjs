@@ -5,7 +5,7 @@ import { access, stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
-import { getContactHandoff, getDemoAnswer, SYSTEM_PROMPT } from "./portfolio-context.mjs";
+import { getDemoAnswer, SYSTEM_PROMPT } from "./portfolio-context.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const DIST = join(ROOT, "dist");
@@ -153,12 +153,6 @@ async function handleChat(request, response) {
     const locale = ["en", "my", "th"].includes(body?.locale) ? body.locale : "en";
     if (!messages) {
       json(response, 400, { error: "Send between 1 and 8 valid chat messages." }, headers);
-      return;
-    }
-
-    const contactHandoff = getContactHandoff(messages.at(-1).content, locale);
-    if (contactHandoff) {
-      json(response, 200, { ...contactHandoff, mode: API_KEY && MODEL ? "live" : "demo" }, headers);
       return;
     }
 
