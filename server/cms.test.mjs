@@ -226,4 +226,13 @@ test('chat-only deployment handles CORS without creating a CMS database or expos
   assert.equal(response.status, 200);
   assert.equal(response.headers.get('access-control-allow-origin'), 'https://portfolio.test');
   assert.equal((await response.json()).mode, 'demo');
+  response = await fetch(url + '/api/contact', { method: 'OPTIONS', headers: { Origin: 'https://portfolio.test' } });
+  assert.equal(response.status, 204);
+  assert.equal(response.headers.get('access-control-allow-origin'), 'https://portfolio.test');
+  response = await fetch(url + '/api/contact', { method: 'POST', headers: { Origin: 'https://evil.test', 'Content-Type': 'application/json' }, body: '{}' });
+  assert.equal(response.status, 403); await response.arrayBuffer();
+  response = await fetch(url + '/api/contact', { method: 'POST', headers: { Origin: 'https://portfolio.test', 'Content-Type': 'application/json' }, body: '{}' });
+  assert.equal(response.status, 400);
+  assert.equal(response.headers.get('access-control-allow-origin'), 'https://portfolio.test');
+  await response.arrayBuffer();
 });

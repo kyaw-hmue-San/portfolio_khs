@@ -116,9 +116,9 @@ function TechBoard() {
   );
 }
 
-function LearningCarousel() {
+function LearningContainer() {
   return (
-    <div className="learning-orbit" aria-labelledby="learning-orbit-title">
+    <div className="learning-container" aria-labelledby="learning-orbit-title">
       <div className="learning-orbit-heading">
         <span className="learning-orbit-status" aria-hidden="true" />
         <div>
@@ -126,16 +126,14 @@ function LearningCarousel() {
           <p>Skills actively moving forward</p>
         </div>
       </div>
-      <div className="learning-orbit-scene">
-        <div className="learning-orbit-ring">
-          {LEARNING.map((item, index) => (
-            <article key={item.title} className="learning-orbit-card" tabIndex={0} style={{ "--card-angle": `${index * 90}deg` } as CSSProperties}>
-              <span className="learning-orbit-number">0{index + 1}</span>
-              <h4>{item.title}</h4>
-              <p>{item.note}</p>
-            </article>
-          ))}
-        </div>
+      <div className="learning-grid">
+        {LEARNING.map((item, index) => (
+          <article key={item.title} className="learning-card">
+            <span className="learning-number">0{index + 1}</span>
+            <h4>{item.title}</h4>
+            <p>{item.note}</p>
+          </article>
+        ))}
       </div>
     </div>
   );
@@ -147,7 +145,7 @@ export function Skills() {
       <div className="max-w-6xl mx-auto">
         <Reveal><header className="flex flex-col gap-3 mb-9"><span style={{ fontFamily: "Inter, sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(245,158,11,0.65)" }}>Capabilities</span><h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(2rem, 5vw, 2.8rem)", fontWeight: 700, color: "rgba(255,255,255,0.93)", lineHeight: 1.12 }}>Skills</h2><p style={{ fontFamily: "Inter, sans-serif", fontSize: "15px", color: "rgba(255,255,255,0.42)", lineHeight: 1.7, maxWidth: "620px" }}>Technologies I use to turn ideas into web, mobile, backend, data, and geospatial work.</p></header></Reveal>
         <Reveal delay={0.08}><TechBoard /></Reveal>
-        <Reveal delay={0.16} className="mt-10"><LearningCarousel /></Reveal>
+        <Reveal delay={0.16} className="mt-10"><LearningContainer /></Reveal>
       </div>
     </section>
   );

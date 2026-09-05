@@ -1,7 +1,6 @@
 import { useContent, ContentStatus } from "../providers/ContentProvider";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ElementType, ReactNode } from "react";
-import useEmblaCarousel from "embla-carousel-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import {
@@ -641,22 +640,77 @@ export function Projects() {
   const [selected, setSelected] = useState<Project | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [selectedSlide, setSelectedSlide] = useState(0);
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "center" });
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const interactionUntil = useRef(0);
+  const [autoScroll, setAutoScroll] = useState(true);
+  const reduceMotion = useReducedMotion();
 
-  const syncSlide = useCallback(() => {
-    if (emblaApi) setSelectedSlide(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
+  const pauseForInteraction = () => { interactionUntil.current = performance.now() + 3000; };
+  const goToSlide = (index: number) => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const slides = viewport.querySelectorAll<HTMLElement>(".project-carousel-slide");
+    const slide = slides[(index + slides.length) % slides.length];
+    if (!slide) return;
+    pauseForInteraction();
+    viewport.scrollTo({ left: viewport.scrollLeft + slide.getBoundingClientRect().left - viewport.getBoundingClientRect().left, behavior: reduceMotion ? "instant" : "smooth" });
+  };
 
   useEffect(() => {
-    if (!emblaApi) return;
-    syncSlide();
-    emblaApi.on("select", syncSlide);
-    emblaApi.on("reInit", syncSlide);
-    return () => {
-      emblaApi.off("select", syncSlide);
-      emblaApi.off("reInit", syncSlide);
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    let frame = 0;
+    let previous = 0;
+    let position = viewport.scrollLeft;
+    let direction = 1;
+    let visible = false;
+    let interacting = false;
+    const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; });
+    observer.observe(viewport);
+    const pointerDown = () => { interacting = true; };
+    const pointerUp = () => { interacting = false; pauseForInteraction(); };
+    const syncSlide = () => {
+      const slides = Array.from(viewport.querySelectorAll<HTMLElement>(".project-carousel-slide"));
+      const center = viewport.getBoundingClientRect().left + viewport.clientWidth / 2;
+      const distance = (slide: HTMLElement) => Math.abs(slide.getBoundingClientRect().left + slide.clientWidth / 2 - center);
+      let nearest = 0;
+      slides.forEach((slide, index) => {
+        if (distance(slide) < distance(slides[nearest])) nearest = index;
+      });
+      setSelectedSlide(nearest);
     };
-  }, [emblaApi, syncSlide]);
+    const tick = (now: number) => {
+      const elapsed = previous ? Math.min(now - previous, 50) : 0;
+      previous = now;
+      const paused = !autoScroll || reduceMotion || panelOpen || !visible || document.hidden || interacting
+        || viewport.matches(":hover") || viewport.contains(document.activeElement) || now < interactionUntil.current;
+      if (!paused) {
+        const max = viewport.scrollWidth - viewport.clientWidth;
+        if (max > 0) {
+          position = Math.max(0, Math.min(max, position + direction * elapsed * 0.035));
+          viewport.scrollLeft = position;
+          if (position >= max || position <= 0) { direction *= -1; interactionUntil.current = now + 1200; }
+        }
+      } else position = viewport.scrollLeft;
+      frame = requestAnimationFrame(tick);
+    };
+    viewport.addEventListener("scroll", syncSlide, { passive: true });
+    viewport.addEventListener("wheel", pauseForInteraction, { passive: true });
+    viewport.addEventListener("pointerdown", pointerDown);
+    window.addEventListener("pointerup", pointerUp);
+    window.addEventListener("pointercancel", pointerUp);
+    syncSlide();
+    frame = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      viewport.removeEventListener("scroll", syncSlide);
+      viewport.removeEventListener("wheel", pauseForInteraction);
+      viewport.removeEventListener("pointerdown", pointerDown);
+      window.removeEventListener("pointerup", pointerUp);
+      window.removeEventListener("pointercancel", pointerUp);
+    };
+  }, [PROJECTS.length, autoScroll, reduceMotion, panelOpen]);
 
   const openProject = (project: Project) => {
     setSelected(project);
@@ -693,7 +747,7 @@ export function Projects() {
         <ContentStatus />
         {!loading && !error && PROJECTS.length === 0 && <p style={{ color: "var(--portfolio-text-muted)" }}>New projects are on the way.</p>}
         {PROJECTS.length > 0 && <div className="project-carousel" role="region" aria-roledescription="carousel" aria-label={t("projects.title")}>
-          <div className="project-carousel-viewport" ref={emblaRef}>
+          <div className="project-carousel-viewport" ref={viewportRef} tabIndex={0} aria-label="Scroll projects horizontally">
             <div className="project-carousel-track">
               {PROJECTS.map((project, index) => (
                 <div
@@ -710,7 +764,8 @@ export function Projects() {
           </div>
 
           <div className="project-carousel-controls">
-            <button type="button" className="project-carousel-arrow" onClick={() => emblaApi?.scrollPrev()} aria-label={t("projects.previous")}>
+            {!reduceMotion && <button type="button" className="project-autoscroll-toggle" onClick={() => setAutoScroll(value => !value)} aria-pressed={autoScroll}>{autoScroll ? "Pause auto-scroll" : "Resume auto-scroll"}</button>}
+            <button type="button" className="project-carousel-arrow" onClick={() => goToSlide(selectedSlide - 1)} aria-label={t("projects.previous")}>
               <ChevronLeft size={17} aria-hidden="true" />
             </button>
             <div className="project-carousel-dots" aria-label={t("projects.choose")}>
@@ -719,13 +774,13 @@ export function Projects() {
                   key={project.id}
                   type="button"
                   className={`project-carousel-dot ${selectedSlide === index ? "is-active" : ""}`}
-                  onClick={() => emblaApi?.scrollTo(index)}
+                  onClick={() => goToSlide(index)}
                   aria-label={`Show ${project.title}`}
                   aria-current={selectedSlide === index ? "true" : undefined}
                 />
               ))}
             </div>
-            <button type="button" className="project-carousel-arrow" onClick={() => emblaApi?.scrollNext()} aria-label={t("projects.next")}>
+            <button type="button" className="project-carousel-arrow" onClick={() => goToSlide(selectedSlide + 1)} aria-label={t("projects.next")}>
               <ChevronRight size={17} aria-hidden="true" />
             </button>
           </div>

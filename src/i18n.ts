@@ -12,6 +12,7 @@ const resources = {
         education: "Education",
         contact: "Contact",
         hireMe: "Hire me",
+        getResume: "Get Resume",
         backToTop: "Back to top",
         openMenu: "Open navigation menu",
         closeMenu: "Close navigation menu",

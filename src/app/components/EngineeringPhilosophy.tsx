@@ -98,6 +98,8 @@ export function EngineeringPhilosophy() {
                 {t("about.paragraph2")}
               </p>
 
+              <a href="#contact" className="about-contact-button">{t("hero.contact")} <span aria-hidden="true">↗</span></a>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 {principles.map((item) => (
                   <div key={item} className="flex gap-3 items-start">
