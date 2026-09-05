@@ -1,3 +1,5 @@
+import { openStore } from "./store.mjs";
+import { createCmsHandler } from "./cms.mjs";
 import { createReadStream } from "node:fs";
 import { access, stat } from "node:fs/promises";
 import { createServer } from "node:http";
@@ -223,8 +225,34 @@ async function serveStatic(request, response) {
   createReadStream(filePath).pipe(response);
 }
 
+const cmsEnabled = process.env.CMS_ENABLED === "true" || (process.env.CMS_ENABLED !== "false" && process.env.NODE_ENV !== "production");
+const cmsDb = cmsEnabled ? openStore() : null;
+const handleCms = cmsDb ? createCmsHandler(cmsDb) : null;
+const chatOrigin = process.env.PUBLIC_ORIGIN ? new URL(process.env.PUBLIC_ORIGIN).origin : null;
+
 const server = createServer(async (request, response) => {
   const url = new URL(request.url, "http://localhost");
+  if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) {
+    response.setHeader("X-Robots-Tag", "noindex, nofollow");
+    response.setHeader("X-Frame-Options", "DENY");
+  }
+  if (handleCms && await handleCms(request, response, url.pathname)) return;
+  if (url.pathname === "/api/chat") {
+    const origin = request.headers.origin;
+    if (origin && chatOrigin && origin !== chatOrigin) {
+      json(response, 403, { error: "Request origin is not allowed." });
+      return;
+    }
+    if (origin && origin === chatOrigin) {
+      response.setHeader("Access-Control-Allow-Origin", chatOrigin);
+      response.setHeader("Vary", "Origin");
+      response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+      response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    }
+    if (request.method === "OPTIONS") {
+      response.writeHead(204); response.end(); return;
+    }
+  }
   if (url.pathname === "/api/health" && request.method === "GET") {
     json(response, 200, { ok: true, chatMode: API_KEY && MODEL ? "live" : "demo" });
     return;
@@ -241,10 +269,21 @@ const server = createServer(async (request, response) => {
     json(response, 405, { error: "Method not allowed." });
     return;
   }
+  if (process.env.CHAT_ONLY === "true") {
+    json(response, 404, { error: "Route not found." }); return;
+  }
   await serveStatic(request, response);
 });
 
-server.listen(PORT, "0.0.0.0", () => {
+server.requestTimeout = 30_000;
+server.headersTimeout = 15_000;
+
+server.listen(PORT, process.env.HOST || "0.0.0.0", () => {
   const mode = API_KEY && MODEL ? "live AI/ML API" : "safe demo";
-  console.log(`Portfolio server running at http://localhost:${PORT} (${mode} mode)`);
+  console.log(`Portfolio server running at http://localhost:${server.address().port} (${mode} mode)`);
+});
+
+for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, () => {
+  server.close(() => { cmsDb?.close(); process.exit(0); });
+  setTimeout(() => process.exit(0), 5000).unref();
 });

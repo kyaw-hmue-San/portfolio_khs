@@ -105,6 +105,7 @@ export function ChatAssistant() {
   ]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [waitingForServer, setWaitingForServer] = useState(false);
   const [mode, setMode] = useState<"demo" | "live" | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -142,14 +143,21 @@ export function ChatAssistant() {
     setInput("");
     setSending(true);
 
+    const controller = new AbortController();
+    const wakeNotice = window.setTimeout(() => setWaitingForServer(true), 8000);
+    const timeout = window.setTimeout(() => controller.abort(), 120000);
     try {
-      const response = await fetch("/api/chat", {
+      const base = (import.meta.env.VITE_CHAT_API_URL || "").replace(/\/$/, "");
+      const response = await fetch(`${base}/api/chat`, {
+        signal: controller.signal,
+        credentials: "omit",
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           locale: (i18n.resolvedLanguage ?? "en").split("-")[0],
           messages: nextMessages
             .filter((message) => message.id !== "welcome")
+            .slice(-8)
             .map(({ role, content: messageContent }) => ({ role, content: messageContent })),
         }),
       });
@@ -177,6 +185,9 @@ export function ChatAssistant() {
         },
       ]);
     } finally {
+      window.clearTimeout(wakeNotice);
+      window.clearTimeout(timeout);
+      setWaitingForServer(false);
       setSending(false);
     }
   };
@@ -265,7 +276,7 @@ export function ChatAssistant() {
               {sending && (
                 <div className="portfolio-chat-message is-assistant is-loading">
                   <LoaderCircle size={14} aria-hidden="true" />
-                  <p>{t("chat.loading")}</p>
+                  <p>{waitingForServer ? t("chat.waking") : t("chat.loading")}</p>
                 </div>
               )}
             </div>

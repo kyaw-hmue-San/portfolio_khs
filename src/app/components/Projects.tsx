@@ -1,3 +1,4 @@
+import { useContent, ContentStatus } from "../providers/ContentProvider";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ElementType, ReactNode } from "react";
 import useEmblaCarousel from "embla-carousel-react";
@@ -44,176 +45,7 @@ interface Project {
   demoUrl?: string;
   sourceUrl?: string;
 }
-const PROJECTS: Project[] = [
-  {
-    id: "ahnyar-house",
-    title: "Ahnyar House Restaurant Ordering System",
-    category: "Main Full-Stack Restaurant Project",
-    summary:
-      "A restaurant operations system that connects QR ordering, admin order handling, stock, receipts, and deployment into one order lifecycle.",
-    stack: ["React", "TypeScript", "Express", "PostgreSQL", "Prisma", "DigitalOcean"],
-    sections: {
-      overview:
-        "Ahnyar House is my main engineering case study. I designed it as an operational system where customer ordering, admin handling, inventory context, and receipt output all depend on the same backend state.",
-      problem:
-        "Manual restaurant ordering creates duplicated work: staff repeat customer orders, admins re-check details, and stock visibility can drift from actual demand. The project needed a single source of truth for the order lifecycle.",
-      solution:
-        "The system separates customer-facing QR ordering from private admin workflows while keeping both sides connected through typed API boundaries and a relational data model.",
-      architecture:
-        "Customer screens send order intent through the frontend API layer, Express validates and persists the request, Prisma maps relational entities in PostgreSQL, and admin views consume the same order state for operational follow-up. Deployment preparation targets DigitalOcean with clearer environment and runtime separation.",
-      decisions: [
-        "Modeled orders, menu items, stock, settings, and receipt data as connected backend concerns instead of isolated UI states.",
-        "Separated public customer routes from private admin assumptions to reduce accidental operational risk.",
-        "Used TypeScript contracts and validation patterns to keep frontend state aligned with backend persistence.",
-        "Included DigitalOcean deployment planning to force production-aware configuration instead of local-only assumptions.",
-      ],
-      challenges: [
-        "Keeping the customer flow simple while preserving enough state for admin order review.",
-        "Designing data relationships that support receipts, stock context, and future operational changes.",
-        "Presenting the project publicly without allowing a live demo to create real restaurant orders.",
-      ],
-      contribution:
-        "I owned the frontend flows, Express API design, Prisma/PostgreSQL modeling, authentication assumptions, deployment preparation, and public case-study presentation.",
-      learned:
-        "The main lesson was to reason from business process first. UI quality matters, but the system only feels reliable when state ownership, permissions, database relationships, and deployment constraints are coherent.",
-      visuals: [
-        "QR table entry -> customer cart -> checkout request -> Express API -> PostgreSQL order state -> admin review -> receipt output.",
-        "Public case study uses screenshots for customer flow; private admin behavior remains source-controlled and non-public.",
-      ],
-    },
-    accent: "amber",
-    icon: Layers,
-    featured: true,
-    coverImage: "/projects/ahnyar-house-preview.webp",
-    coverAlt: "Ahnyar House restaurant ordering interface shown on mobile devices",
-    demoUrl: "https://anh-portfolio.onrender.com",
-  },
-  {
-    id: "cosmiccraft",
-    title: "CosmicCraft - AI Career Navigator",
-    category: "Hackathon Project",
-    summary:
-      "A source-code hackathon project exploring structured AI workflows for career guidance, mock interviews, and profile writing.",
-    stack: ["Next.js", "TypeScript", "OpenAI API", "MongoDB", "JWT"],
-    sections: {
-      overview:
-        "CosmicCraft tested whether a career assistant could turn profile data into useful guidance across several AI-assisted workflows within a short hackathon timeline.",
-      problem:
-        "Career guidance, interview practice, and personal branding are usually split across different tools. The challenge was to unify those tasks without making one fragile, overloaded AI endpoint.",
-      solution:
-        "I treated each AI interaction as a separate intent with its own prompt boundary, input shape, and response expectation, so the system could remain understandable under hackathon time pressure.",
-      architecture:
-        "Profile and session data flow through the app into task-specific AI requests. MongoDB stores user context, while the application routes career guidance, interview feedback, and narrative generation through separate service paths.",
-      decisions: [
-        "Separated AI tasks by intent so prompts could evolve independently.",
-        "Structured prompts around user context and target role rather than generic questions.",
-        "Persisted profile data so AI responses could be generated from known state instead of repeated manual input.",
-        "Kept the project source-code oriented after the event instead of pointing recruiters to a stale deployment.",
-      ],
-      challenges: [
-        "Balancing speed and architecture during a hackathon.",
-        "Keeping AI output predictable enough for a product-like interface.",
-        "Avoiding generic model responses by shaping inputs and expected response formats.",
-      ],
-      contribution:
-        "I contributed to product architecture, AI workflow design, frontend implementation, and source-code delivery for the hackathon submission.",
-      learned:
-        "Reliable AI UX depends less on calling a model and more on data shape, prompt scope, fallback behavior, and how clearly each workflow defines success.",
-      visuals: [
-        "Profile context -> task-specific prompt -> AI response -> structured career output.",
-        "Separate paths for guidance, interview practice, opportunity scanning, and narrative writing.",
-      ],
-    },
-    accent: "emerald",
-    icon: Rocket,
-    coverImage: "/projects/cosmiccraft-preview.webp",
-    coverAlt: "CosmicCraft AI Career Navigator welcome screen in a browser window",
-  },
-  {
-    id: "lms",
-    title: "E-Learning Management System",
-    category: "Online University Project",
-    summary:
-      "A relational LMS that maps courses, users, assessments, progress, rewards, and certificates into testable backend services.",
-    stack: ["React", "Spring Boot", "Java", "MySQL", "Docker"],
-    sections: {
-      overview:
-        "The LMS project connected software engineering, database systems, and web development coursework into one online academic platform.",
-      problem:
-        "Learning systems become hard to maintain when courses, modules, users, progress, and certificates are modeled informally. The project needed a normalized structure that could support multiple roles without duplicating data.",
-      solution:
-        "We designed domain-focused REST APIs backed by a relational MySQL schema, with role-aware flows for students, instructors, and administrators.",
-      architecture:
-        "React handles the client workflow, Spring Boot exposes resource-oriented APIs, Spring Security/JWT protects access, and MySQL stores normalized course, enrollment, quiz, badge, and certificate records.",
-      decisions: [
-        "Normalized enrollment, progress, assessment, and certificate data instead of embedding everything inside course records.",
-        "Organized endpoints around domain resources so API behavior stayed easier to test.",
-        "Separated student, instructor, and admin responsibilities at the backend layer.",
-        "Used Docker to reduce setup differences between development environments.",
-      ],
-      challenges: [
-        "Keeping a large academic domain understandable across many related tables.",
-        "Designing APIs that matched database relationships without leaking unnecessary complexity to the UI.",
-        "Coordinating frontend and backend changes in a team project context.",
-      ],
-      contribution:
-        "I worked across backend structure, database schema planning, API behavior, and frontend integration as part of the university project.",
-      learned:
-        "This project made database-first design practical for me. Clear relationships and ownership make API design and frontend state much less fragile.",
-      visuals: [
-        "Users -> enrollments -> courses -> modules -> content -> progress.",
-        "Quizzes, badges, and certificates reference course and student records through normalized relationships.",
-      ],
-    },
-    accent: "blue",
-    icon: GraduationCap,
-    coverImage: "/projects/learnhub-preview.webp",
-    coverAlt: "LearnHub e-learning platform landing page in a browser window",
-    demoUrl: "https://lms-frontend-882950565528.us-central1.run.app/",
-  },
-  {
-    id: "anchor-mobile",
-    title: "Anchor Mobile",
-    category: "React Native Mobile App",
-    summary:
-      "A private mobile app that coordinates authentication, local unlock, shared spaces, media, notifications, and location permissions.",
-    stack: ["Expo", "React Native", "TypeScript", "Firebase", "Firestore"],
-    sections: {
-      overview:
-        "Anchor Mobile explores the engineering complexity behind private mobile spaces, where local state, shared state, permissions, and backend rules all affect reliability.",
-      problem:
-        "A private couple-space app cannot assume constant permissions or perfect connectivity. Authentication, local unlock, storage, media upload, notifications, and location can each fail independently.",
-      solution:
-        "The app separates session, space, and theme state into providers, uses Firebase for shared data and authentication, and keeps local PIN unlock separate from account authentication.",
-      architecture:
-        "Expo/React Native manages the app shell, React Navigation reacts to auth and pairing state, Firebase Auth owns identity, Firestore stores spaces and shared records, Firebase Storage handles media, and AsyncStorage supports local unlock and settings.",
-      decisions: [
-        "Separated app providers so navigation could respond consistently to session and pairing state.",
-        "Used one-use pairing codes and Firestore membership rules to control shared-space access.",
-        "Kept quick PIN unlock local after sign-in to improve usability without replacing Firebase Auth.",
-        "Designed web/native fallbacks for maps, media uploads, storage behavior, and permissions.",
-      ],
-      challenges: [
-        "Coordinating local device state with shared Firestore state.",
-        "Handling permission-dependent features without breaking the core app flow.",
-        "Keeping web and native behavior consistent where platform APIs differ.",
-      ],
-      contribution:
-        "I structured the app flow, navigation state, Firebase services, local unlock behavior, shared-space data model, and mobile permission handling.",
-      learned:
-        "The biggest lesson was mobile reliability. A good mobile app treats denied permissions, async storage, backend rules, and platform differences as normal states, not edge cases.",
-      visuals: [
-        "Firebase session -> local PIN gate -> active space -> main tabs.",
-        "Shared records flow through Firestore; local preferences and unlock state stay on-device.",
-      ],
-    },
-    accent: "violet",
-    icon: Smartphone,
-    coverImage: "/projects/anchor-preview-v2.webp",
-    coverAlt: "Anchor mobile app onboarding and settings screens shown on two phones",
-    demoUrl: "https://anchor-2914.web.app/",
-  },
-];
+const PROJECT_ICONS = { Layers, Rocket, GraduationCap, Smartphone };
 
 const ACCENT = {
   amber: {
@@ -645,11 +477,13 @@ function CaseStudyContent({ project }: { project: Project }) {
 }
 
 function CaseStudyPanel({
+  projects,
   open,
   selected,
   onSelect,
   onClose,
 }: {
+  projects: Project[];
   open: boolean;
   selected: Project;
   onSelect: (project: Project) => void;
@@ -711,7 +545,7 @@ function CaseStudyPanel({
                 }}>
                   {t("projects.caseStudies")}
                 </p>
-                {PROJECTS.map((project) => {
+                {projects.map((project) => {
                   const active = project.id === selected.id;
                   const a = ACCENT[project.accent];
                   return (
@@ -802,7 +636,9 @@ function CaseStudyPanel({
 
 export function Projects() {
   const { t } = useTranslation();
-  const [selected, setSelected] = useState<Project>(PROJECTS[0]);
+  const { projects: content, loading, error } = useContent();
+  const PROJECTS = useMemo<Project[]>(() => content.map(project => ({ ...project, icon: PROJECT_ICONS[project.icon] || Layers })), [content]);
+  const [selected, setSelected] = useState<Project | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [selectedSlide, setSelectedSlide] = useState(0);
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "center" });
@@ -854,7 +690,9 @@ export function Projects() {
           </div>
         </Reveal>
 
-        <div className="project-carousel" role="region" aria-roledescription="carousel" aria-label={t("projects.title")}>
+        <ContentStatus />
+        {!loading && !error && PROJECTS.length === 0 && <p style={{ color: "var(--portfolio-text-muted)" }}>New projects are on the way.</p>}
+        {PROJECTS.length > 0 && <div className="project-carousel" role="region" aria-roledescription="carousel" aria-label={t("projects.title")}>
           <div className="project-carousel-viewport" ref={emblaRef}>
             <div className="project-carousel-track">
               {PROJECTS.map((project, index) => (
@@ -891,16 +729,17 @@ export function Projects() {
               <ChevronRight size={17} aria-hidden="true" />
             </button>
           </div>
-        </div>
+        </div>}
 
       </div>
 
-      <CaseStudyPanel
+      {selected && <CaseStudyPanel
+        projects={PROJECTS}
         open={panelOpen}
         selected={selected}
         onSelect={setSelected}
         onClose={() => setPanelOpen(false)}
-      />
+      />}
     </section>
   );
 }
