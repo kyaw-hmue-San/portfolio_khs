@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { motion } from "motion/react";
+import { useRef, type ReactNode } from "react";
+import { motion, useInView } from "motion/react";
 import { BookOpen, GraduationCap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -34,32 +34,34 @@ const EDUCATION = [
 
 export function Education() {
   const { t } = useTranslation();
+  const sectionRef = useRef<HTMLElement>(null);
+  const inView = useInView(sectionRef);
   return (
-    <section id="education" className="education-section px-4 sm:px-6">
+    <section id="education" ref={sectionRef} data-animate={inView} className="education-section px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
-        <div className="education-layout">
-          <Reveal className="education-intro">
+        <div className="academic-layout">
+          <Reveal className="academic-intro">
             <span className="education-label">{t("educationSection.label")}</span>
             <h2>{t("educationSection.title")}<br /><em>{t("educationSection.accent")}</em></h2>
             <p>{t("educationSection.intro")}</p>
           </Reveal>
 
-          <ol className="education-path" aria-label={t("educationSection.aria")}>
+          <ol className="academic-timeline" aria-label={t("educationSection.aria")}>
             {EDUCATION.map(({ icon: Icon, ...item }, index) => (
-              <li key={item.degree}>
+              <li key={item.degree} className={index === 0 ? "is-current" : undefined}>
+                <span className="academic-node" aria-hidden="true"><Icon size={18} /></span>
                 <Reveal delay={0.08 + index * 0.08}>
-                  <article className="education-card">
-                    <div className="education-card-topline">
-                      <span className="education-card-icon"><Icon size={17} aria-hidden="true" /></span>
-                      <span className="education-eyebrow">{t(item.eyebrow)}</span>
-                      <time>{t(item.period)}</time>
+                  <article className="academic-entry">
+                    <div className="academic-entry-top">
+                      <span className="academic-period">{t(item.period)}</span>
+                      <span className="academic-status">{t(item.eyebrow)}</span>
                     </div>
-                    <div className="education-card-copy">
-                      <h3>{t(item.degree)}</h3>
-                      <p className="education-focus">{t(item.focus)}</p>
-                      <p className="education-meta">{t(item.school)}<span aria-hidden="true">•</span>{t(item.location)}</p>
+                    <h3>{t(item.focus)}</h3>
+                    <p className="academic-degree">{t(item.degree)}</p>
+                    <div className="academic-school">
+                      <span>{t(item.school)}</span>
+                      <span>{t(item.location)}</span>
                     </div>
-                    <span className="education-index" aria-hidden="true">0{index + 1}</span>
                   </article>
                 </Reveal>
               </li>

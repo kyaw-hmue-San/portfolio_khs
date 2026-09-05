@@ -527,7 +527,7 @@ section[id] {
 
 .tech-info-panel h3 {
   margin-bottom: 8px;
-  font-family: "Playfair Display", serif;
+  font-family: var(--portfolio-font-display);
   font-size: 25px;
   font-weight: 700;
   line-height: 1.15;
@@ -1324,7 +1324,7 @@ section[id] {
 
 .learning-orbit-card h4 {
   max-width: 180px;
-  font-family: "Playfair Display", serif;
+  font-family: var(--portfolio-font-display);
   font-size: 18px;
   font-weight: 700;
   line-height: 1.15;
@@ -2604,3 +2604,119 @@ section[id] {
 @media (max-width: 639px) { .inquiry-fields { grid-template-columns: 1fr; } }
 
 @media (max-width: 379px) { .learning-grid { grid-template-columns: 1fr; gap: 16px; } }
+
+/* Keep the toolkit readable before any interaction. */
+.tech-board-shell, :root[data-theme="light"] .tech-board-shell {
+  min-height: 0;
+  background: #0d1118;
+  --portfolio-text-strong: #f1f5f9;
+  --portfolio-text-secondary: #cbd5e1;
+  --portfolio-text-muted: #a2adbc;
+}
+.tech-board-layout { width: 100%; grid-template-columns: minmax(0, 1fr) 240px; gap: 28px; padding: 64px 28px 28px; }
+.tech-keyboard { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; padding: 0; transform: none; }
+.tech-keyboard::before, .tech-key::before, .tech-key::after { display: none; }
+.tech-key, .tech-key:nth-child(n), .tech-key.is-selected {
+  width: 100%; height: 94px; aspect-ratio: auto;
+  transform: none; filter: none;
+  border: 1px solid #39414e;
+  background: #191f29;
+  box-shadow: 0 5px 0 #05080d, 0 7px 10px rgb(0 0 0 / .2);
+}
+.tech-key-face { inset: 5px; gap: 8px; background: linear-gradient(145deg, #2b3441, #1b222d); box-shadow: inset 0 1px 0 rgb(255 255 255 / .08); }
+.tech-key-icon { width: 34px; height: 34px; filter: none; }
+.tech-key-name, .tech-key:hover .tech-key-name, .tech-key:focus-visible .tech-key-name, .tech-key.is-selected .tech-key-name {
+  display: block; max-width: 100%; padding: 0 2px; font-size: 11px; line-height: 1.4; font-weight: 500;
+  opacity: 1; color: #edf2f7; white-space: normal; overflow: visible; letter-spacing: 0;
+}
+.tech-key:hover, .tech-key:focus-visible, .tech-key.is-selected { border-color: #f59e0b; filter: none; transform: none; box-shadow: 0 5px 0 #05080d; }
+.tech-key:focus-visible { outline: 2px solid #f59e0b; outline-offset: 4px; }
+.tech-key:active { transform: translateY(2px); box-shadow: 0 3px 0 #05080d; }
+.tech-board-hint { font-size: 11px; width: 100%; text-align: center; }
+@media (max-width: 767px) {
+  .tech-board-shell { padding: 0; }
+  .tech-board-layout { grid-template-columns: 1fr; padding: 58px 16px 22px; gap: 24px; }
+  .tech-keyboard { gap: 12px; }
+  .tech-key, .tech-key:nth-child(n), .tech-key.is-selected { height: 88px; }
+  .tech-key-icon { width: 30px; height: 30px; }
+}
+@media (max-width: 379px) { .tech-keyboard { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* Myanmar marks need more vertical room than Latin headings. */
+:root[lang="my"] .portfolio-shell :is(h1, h2, h3, h4) { line-height: 1.55 !important; letter-spacing: normal !important; }
+:root[lang="my"] .portfolio-shell :is(p, li) { line-height: 1.9 !important; letter-spacing: normal !important; }
+:root[lang="my"] .portfolio-shell :is(button, a, span, label) { letter-spacing: normal !important; }
+:root[lang="my"] .portfolio-shell :is(button, a) { line-height: 1.65; }
+:root[lang="my"] .portfolio-shell :is(em, h1 span) { font-style: normal !important; }
+:root[lang="my"] .portfolio-shell h1 { font-size: clamp(2.6rem, 7vw, 5.5rem) !important; }
+/* Monochrome marks stay visible on the dark keycaps. */
+.tech-board-shell img[src$="/github.svg"],
+.tech-board-shell img[src$="/express.svg"] { filter: brightness(0) invert(1); }
+
+/* A short emerald highlight follows the edge without tinting the key face. */
+.tech-key-trace {
+  position: absolute;
+  inset: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  pointer-events: none;
+  overflow: visible;
+  z-index: 1;
+  opacity: .65;
+  transition: opacity 180ms ease;
+}
+.tech-key-trace rect {
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  fill: none;
+  stroke: #34d399;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 12 88;
+  filter: drop-shadow(0 0 2px rgb(52 211 153 / .35));
+  animation: key-border-travel 7s linear infinite;
+  animation-delay: var(--border-delay, 0s);
+  animation-play-state: paused;
+}
+.tech-board-shell[data-animate="true"] .tech-key-trace rect { animation-play-state: running; }
+.tech-key:hover .tech-key-trace, .tech-key:focus-visible .tech-key-trace { opacity: 1; }
+@keyframes key-border-travel { to { stroke-dashoffset: -100; } }
+@media (max-width: 767px) { .tech-key-trace rect { rx: 9px; } }
+@media (prefers-reduced-motion: reduce) {
+  .tech-key-trace { transition: none; }
+  .tech-key-trace rect { animation: none; stroke-dasharray: none; opacity: .4; }
+}
+
+/* Academic timeline: open typography, a single illuminated rail. */
+.academic-layout { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr); gap: clamp(32px, 6vw, 80px); align-items: start; }
+.academic-intro h2 { margin: 20px 0 18px; font-family: var(--portfolio-font-display); font-size: clamp(2.5rem, 4.5vw, 3.8rem); line-height: 1.12; letter-spacing: -.035em; color: var(--portfolio-text-strong); }
+.academic-intro h2 em { color: var(--portfolio-amber-text); }
+.academic-intro > p { max-width: 320px; color: var(--portfolio-text-muted); font: 400 14px/1.8 var(--portfolio-font-sans); }
+.academic-timeline { position: relative; list-style: none; padding: 0 0 0 54px; margin: 0; }
+.academic-timeline::before { content: ""; position: absolute; left: 18px; top: 18px; bottom: 28px; width: 1px; background: var(--portfolio-border); }
+.academic-timeline::after { content: ""; position: absolute; left: 17px; top: 20px; width: 3px; height: 36px; border-radius: 3px; background: linear-gradient(transparent, #34d399, transparent); box-shadow: 0 0 10px rgb(52 211 153 / .2); animation: academic-light 6s ease-in-out infinite alternate paused; pointer-events: none; }
+.education-section[data-animate="true"] .academic-timeline::after { animation-play-state: running; }
+.academic-timeline > li { position: relative; padding-bottom: 26px; }
+.academic-timeline > li + li { padding-top: 26px; border-top: 1px solid var(--portfolio-border); }
+.academic-timeline > li:last-child { padding-bottom: 0; }
+.academic-node { position: absolute; left: -54px; top: 0; z-index: 1; display: grid; place-items: center; width: 37px; height: 37px; background: var(--portfolio-bg); border: 1px solid var(--portfolio-border); border-radius: 50%; color: var(--portfolio-text-muted); }
+.academic-timeline > li + li .academic-node { top: 26px; }
+.academic-timeline .is-current .academic-node { color: var(--portfolio-green-text); border-color: rgb(52 211 153 / .35); box-shadow: 0 0 18px rgb(52 211 153 / .07); }
+.academic-entry-top { min-height: 37px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.academic-period { color: var(--portfolio-text-secondary); font: 600 13px/1.6 var(--portfolio-font-sans); font-variant-numeric: tabular-nums; }
+.academic-status { font: 500 10px/1.6 var(--portfolio-font-sans); color: var(--portfolio-text-muted); }
+.is-current .academic-status { color: var(--portfolio-green-text); padding: 4px 9px; border: 1px solid rgb(52 211 153 / .18); border-radius: 5px; background: rgb(52 211 153 / .035); }
+.academic-entry h3 { margin: 0; color: var(--portfolio-text-strong); font: 600 clamp(20px, 2.5vw, 28px)/1.35 var(--portfolio-font-sans); letter-spacing: -.025em; }
+.academic-degree { margin: 6px 0 18px; color: var(--portfolio-amber-text); font: 400 13px/1.7 var(--portfolio-font-sans); }
+.academic-school { display: flex; flex-direction: column; gap: 4px; font: 400 12px/1.7 var(--portfolio-font-sans); color: var(--portfolio-text-muted); }
+.academic-school > span:first-child { color: var(--portfolio-text-secondary); }
+@keyframes academic-light { from { top: 20px; } to { top: calc(100% - 64px); } }
+@media (max-width: 767px) {
+  .academic-layout { grid-template-columns: 1fr; gap: 32px; }
+  .academic-intro h2 br { display: none; }
+  .academic-intro h2 em::before { content: " "; white-space: pre; }
+  .academic-intro > p { max-width: 520px; }
+  .academic-timeline { padding-left: 48px; }
+  .academic-node { left: -48px; }
+}
+@media (prefers-reduced-motion: reduce) { .academic-timeline::after { animation: none; opacity: .5; } }

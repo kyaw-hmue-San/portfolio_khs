@@ -1,5 +1,5 @@
-import { useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
-import { motion } from "motion/react";
+import { useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { motion, useInView } from "motion/react";
 
 function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
   return (
@@ -38,61 +38,27 @@ const LEARNING = [
 function TechBoard() {
   const [active, setActive] = useState(TECH_KEYS[0]);
   const boardRef = useRef<HTMLDivElement>(null);
-
-  const moveBoard = (event: MouseEvent<HTMLDivElement>) => {
-    const board = boardRef.current;
-    if (!board || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    const bounds = board.getBoundingClientRect();
-    const pointerX = event.clientX - bounds.left;
-    const pointerY = event.clientY - bounds.top;
-    const normalizedX = pointerX / bounds.width - 0.5;
-    const normalizedY = pointerY / bounds.height - 0.5;
-
-    board.style.setProperty("--board-tilt-x", `${normalizedY * -3}deg`);
-    board.style.setProperty("--board-tilt-y", `${normalizedX * 4}deg`);
-    board.style.setProperty("--light-x", `${pointerX}px`);
-    board.style.setProperty("--light-y", `${pointerY}px`);
-
-    board.querySelectorAll<HTMLElement>(".tech-key").forEach((key) => {
-      const keyBounds = key.getBoundingClientRect();
-      const deltaX = event.clientX - (keyBounds.left + keyBounds.width / 2);
-      const deltaY = event.clientY - (keyBounds.top + keyBounds.height / 2);
-      const distance = Math.hypot(deltaX, deltaY);
-      const strength = Math.max(0, 1 - distance / 170);
-      key.style.setProperty("--magnet-x", `${deltaX * strength * 0.065}px`);
-      key.style.setProperty("--magnet-y", `${deltaY * strength * 0.065}px`);
-    });
-  };
-
-  const resetBoard = () => {
-    const board = boardRef.current;
-    if (!board) return;
-    board.style.setProperty("--board-tilt-x", "0deg");
-    board.style.setProperty("--board-tilt-y", "0deg");
-    board.querySelectorAll<HTMLElement>(".tech-key").forEach((key) => {
-      key.style.setProperty("--magnet-x", "0px");
-      key.style.setProperty("--magnet-y", "0px");
-    });
-  };
-
+  const inView = useInView(boardRef);
   return (
-    <div className="tech-board-shell" ref={boardRef} onMouseMove={moveBoard} onMouseLeave={resetBoard}>
-      <p className="tech-board-hint">Hover, focus, or tap a key</p>
+    <div className="tech-board-shell" ref={boardRef} data-animate={inView}>
+      <p className="tech-board-hint">My development toolkit</p>
       <div className="tech-board-layout">
         <div className="tech-keyboard" aria-label="Interactive technology toolkit">
-          {TECH_KEYS.map((tech) => (
+          {TECH_KEYS.map((tech, index) => (
             <button
               key={tech.name}
               type="button"
               className={`tech-key ${active.name === tech.name ? "is-selected" : ""}`}
-              style={{ "--key-accent": tech.color } as CSSProperties}
+              style={{ "--key-accent": tech.color, "--border-delay": `${index * -0.47}s` } as CSSProperties}
               aria-label={`${tech.name}: ${tech.context}`}
               aria-pressed={active.name === tech.name}
               onMouseEnter={() => setActive(tech)}
               onFocus={() => setActive(tech)}
               onClick={() => setActive(tech)}
             >
+              <svg className="tech-key-trace" aria-hidden="true" focusable="false">
+                <rect x="1" y="1" rx="12" pathLength="100" />
+              </svg>
               <span className="tech-key-face">
                 <img className="tech-key-icon" src={tech.icon} alt="" aria-hidden="true" />
                 <span className="tech-key-name">{tech.name}</span>
@@ -140,7 +106,7 @@ export function Skills() {
   return (
     <section id="skills" className="py-24 sm:py-28 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
-        <Reveal><header className="flex flex-col gap-3 mb-9"><span style={{ fontFamily: "Inter, sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(245,158,11,0.65)" }}>Capabilities</span><h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(2rem, 5vw, 2.8rem)", fontWeight: 700, color: "rgba(255,255,255,0.93)", lineHeight: 1.12 }}>Skills</h2><p style={{ fontFamily: "Inter, sans-serif", fontSize: "15px", color: "rgba(255,255,255,0.42)", lineHeight: 1.7, maxWidth: "620px" }}>Technologies I use to turn ideas into web, mobile, backend, data, and geospatial work.</p></header></Reveal>
+        <Reveal><header className="flex flex-col gap-3 mb-9"><span style={{ fontFamily: "var(--portfolio-font-sans)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(245,158,11,0.65)" }}>Capabilities</span><h2 style={{ fontFamily: "var(--portfolio-font-display)", fontSize: "clamp(2rem, 5vw, 2.8rem)", fontWeight: 700, color: "var(--portfolio-text-strong)", lineHeight: 1.12 }}>Skills</h2><p style={{ fontFamily: "var(--portfolio-font-sans)", fontSize: "15px", color: "var(--portfolio-text-muted)", lineHeight: 1.7, maxWidth: "620px" }}>Technologies I use to turn ideas into web, mobile, backend, data, and geospatial work.</p></header></Reveal>
         <Reveal delay={0.08}><TechBoard /></Reveal>
         <Reveal delay={0.16} className="mt-10"><LearningContainer /></Reveal>
       </div>

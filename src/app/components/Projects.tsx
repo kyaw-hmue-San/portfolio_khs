@@ -642,7 +642,6 @@ export function Projects() {
   const [selectedSlide, setSelectedSlide] = useState(0);
   const viewportRef = useRef<HTMLDivElement>(null);
   const interactionUntil = useRef(0);
-  const [autoScroll, setAutoScroll] = useState(true);
   const reduceMotion = useReducedMotion();
 
   const pauseForInteraction = () => { interactionUntil.current = performance.now() + 3000; };
@@ -682,7 +681,7 @@ export function Projects() {
     const tick = (now: number) => {
       const elapsed = previous ? Math.min(now - previous, 50) : 0;
       previous = now;
-      const paused = !autoScroll || reduceMotion || panelOpen || !visible || document.hidden || interacting
+      const paused = reduceMotion || panelOpen || !visible || document.hidden || interacting
         || viewport.matches(":hover") || viewport.contains(document.activeElement) || now < interactionUntil.current;
       if (!paused) {
         const max = viewport.scrollWidth - viewport.clientWidth;
@@ -710,7 +709,7 @@ export function Projects() {
       window.removeEventListener("pointerup", pointerUp);
       window.removeEventListener("pointercancel", pointerUp);
     };
-  }, [PROJECTS.length, autoScroll, reduceMotion, panelOpen]);
+  }, [PROJECTS.length, reduceMotion, panelOpen]);
 
   const openProject = (project: Project) => {
     setSelected(project);
@@ -764,7 +763,6 @@ export function Projects() {
           </div>
 
           <div className="project-carousel-controls">
-            {!reduceMotion && <button type="button" className="project-autoscroll-toggle" onClick={() => setAutoScroll(value => !value)} aria-pressed={autoScroll}>{autoScroll ? "Pause auto-scroll" : "Resume auto-scroll"}</button>}
             <button type="button" className="project-carousel-arrow" onClick={() => goToSlide(selectedSlide - 1)} aria-label={t("projects.previous")}>
               <ChevronLeft size={17} aria-hidden="true" />
             </button>
