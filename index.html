@@ -12,6 +12,17 @@
     <meta name="author" content="Kyaw Hmue San" />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#07090f" />
+    <script>
+      (() => {
+        const stored = localStorage.getItem("portfolio-theme");
+        const theme = stored === "light" || stored === "dark"
+          ? stored
+          : matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.classList.toggle("dark", theme === "dark");
+        document.documentElement.style.colorScheme = theme;
+      })();
+    </script>
     <link rel="canonical" href="https://kyawhmuesan.dev/" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
@@ -36,4 +47,3 @@
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

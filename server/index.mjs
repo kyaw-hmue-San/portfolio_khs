@@ -85,7 +85,8 @@ function sanitizeMessages(input) {
   return valid && sanitized.at(-1)?.role === "user" ? sanitized : null;
 }
 
-async function requestAiMl(messages) {
+async function requestAiMl(messages, locale) {
+  const language = { en: "English", my: "Myanmar (Burmese)", th: "Thai" }[locale] ?? "English";
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
       const upstream = await fetch(API_URL, {
@@ -96,7 +97,11 @@ async function requestAiMl(messages) {
         },
         body: JSON.stringify({
           model: MODEL,
-          messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "system", content: `Reply in ${language}. Keep technology and product names in their original form.` },
+            ...messages,
+          ],
           temperature: 0.25,
           max_tokens: 300,
           stream: false,
@@ -143,12 +148,13 @@ async function handleChat(request, response) {
   try {
     const body = await readJson(request);
     const messages = sanitizeMessages(body?.messages);
+    const locale = ["en", "my", "th"].includes(body?.locale) ? body.locale : "en";
     if (!messages) {
       json(response, 400, { error: "Send between 1 and 8 valid chat messages." }, headers);
       return;
     }
 
-    const contactHandoff = getContactHandoff(messages.at(-1).content);
+    const contactHandoff = getContactHandoff(messages.at(-1).content, locale);
     if (contactHandoff) {
       json(response, 200, { ...contactHandoff, mode: API_KEY && MODEL ? "live" : "demo" }, headers);
       return;
@@ -156,14 +162,14 @@ async function handleChat(request, response) {
 
     if (!API_KEY || !MODEL) {
       json(response, 200, {
-        message: getDemoAnswer(messages.at(-1).content),
+        message: getDemoAnswer(messages.at(-1).content, locale),
         mode: "demo",
       }, headers);
       return;
     }
 
     try {
-      const message = await requestAiMl(messages);
+      const message = await requestAiMl(messages, locale);
       json(response, 200, { message, mode: "live" }, headers);
     } catch (error) {
       const transient = error.name === "TimeoutError"
@@ -172,7 +178,7 @@ async function handleChat(request, response) {
 
       console.warn("AI/ML temporarily unavailable; serving a portfolio fallback:", error.status ?? error.name);
       json(response, 200, {
-        message: getDemoAnswer(messages.at(-1).content),
+        message: getDemoAnswer(messages.at(-1).content, locale),
         mode: "demo",
       }, headers);
     }

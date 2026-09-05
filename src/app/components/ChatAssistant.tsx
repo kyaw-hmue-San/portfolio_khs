@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent, ReactNode } from "react";
 import { ArrowUpRight, LoaderCircle, Mail, Send, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 type EmailAction = {
   type: "email";
@@ -17,17 +18,7 @@ type ChatMessage = {
   action?: EmailAction;
 };
 
-const INITIAL_MESSAGE: ChatMessage = {
-  id: "welcome",
-  role: "assistant",
-  content: "Hi, I'm Rim — Kyaw's AI portfolio assistant. I can help you explore his projects, skills, education, and availability.",
-};
-
-const SUGGESTIONS = [
-  "Which project shows backend experience?",
-  "What technologies does Kyaw use?",
-  "Is Kyaw available for internships?",
-];
+const SUGGESTION_KEYS = ["chat.suggestion1", "chat.suggestion2", "chat.suggestion3"];
 
 function renderInlineMarkdown(text: string): ReactNode[] {
   const tokenPattern = /(\*\*[^*]+\*\*|\[[^\]]+\]\((?:https?:\/\/|mailto:)[^)]+\)|https?:\/\/[^\s]+|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,})/g;
@@ -106,9 +97,12 @@ function RichMessage({ content }: { content: string }) {
 }
 
 export function ChatAssistant() {
+  const { t, i18n } = useTranslation();
   const reduceMotion = useReducedMotion();
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { id: "welcome", role: "assistant", content: t("chat.welcome") },
+  ]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [mode, setMode] = useState<"demo" | "live" | null>(null);
@@ -119,6 +113,12 @@ export function ChatAssistant() {
     if (!open) return;
     inputRef.current?.focus();
   }, [open]);
+
+  useEffect(() => {
+    setMessages((current) => current.map((message) =>
+      message.id === "welcome" ? { ...message, content: t("chat.welcome") } : message
+    ));
+  }, [i18n.resolvedLanguage, t]);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: reduceMotion ? "auto" : "smooth" });
@@ -147,6 +147,7 @@ export function ChatAssistant() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          locale: (i18n.resolvedLanguage ?? "en").split("-")[0],
           messages: nextMessages
             .filter((message) => message.id !== "welcome")
             .map(({ role, content: messageContent }) => ({ role, content: messageContent })),
@@ -172,9 +173,7 @@ export function ChatAssistant() {
         {
           id: crypto.randomUUID(),
           role: "assistant",
-          content: error instanceof Error
-            ? `${error.message} You can still reach Kyaw directly at kyawhmuesan@gmail.com.`
-            : "The assistant is temporarily unavailable. Please contact Kyaw at kyawhmuesan@gmail.com.",
+          content: error instanceof Error ? `${error.message} ${t("chat.fallback")}` : t("chat.fallback"),
         },
       ]);
     } finally {
@@ -216,11 +215,11 @@ export function ChatAssistant() {
               <div>
                 <div className="portfolio-chat-title-row">
                   <h2 id="portfolio-chat-title">Rim</h2>
-                  <span className="portfolio-chat-online">Online</span>
+                  <span className="portfolio-chat-online">{t("chat.online")}</span>
                 </div>
-                <p>Kyaw's AI portfolio assistant</p>
+                <p>{t("chat.subtitle")}</p>
               </div>
-              <button type="button" onClick={() => setOpen(false)} aria-label="Close Rim">
+              <button type="button" onClick={() => setOpen(false)} aria-label={t("chat.close")}>
                 <X size={17} aria-hidden="true" />
               </button>
             </header>
@@ -239,15 +238,15 @@ export function ChatAssistant() {
                       <div className="portfolio-chat-handoff">
                         <span className="portfolio-chat-handoff-icon"><Mail size={16} aria-hidden="true" /></span>
                         <div>
-                          <span>Ready to connect</span>
-                          <strong>Continue with Kyaw</strong>
-                          <small>Your email app will open with a prepared message.</small>
+                          <span>{t("chat.ready")}</span>
+                          <strong>{t("chat.continue")}</strong>
+                          <small>{t("chat.emailHelp")}</small>
                         </div>
                         <a
                           href={`mailto:${message.action.email}?subject=${encodeURIComponent(message.action.subject)}&body=${encodeURIComponent(message.action.body)}`}
                           aria-label={`Open email to ${message.action.email}`}
                         >
-                          Open email <ArrowUpRight size={14} aria-hidden="true" />
+                          {t("chat.openEmail")} <ArrowUpRight size={14} aria-hidden="true" />
                         </a>
                       </div>
                     )}
@@ -256,9 +255,9 @@ export function ChatAssistant() {
               ))}
               {messages.length === 1 && (
                 <div className="portfolio-chat-suggestions" aria-label="Suggested questions">
-                  {SUGGESTIONS.map((suggestion) => (
-                    <button key={suggestion} type="button" onClick={() => void sendMessage(suggestion)}>
-                      {suggestion}
+                  {SUGGESTION_KEYS.map((suggestionKey) => (
+                    <button key={suggestionKey} type="button" onClick={() => void sendMessage(t(suggestionKey))}>
+                      {t(suggestionKey)}
                     </button>
                   ))}
                 </div>
@@ -266,13 +265,13 @@ export function ChatAssistant() {
               {sending && (
                 <div className="portfolio-chat-message is-assistant is-loading">
                   <LoaderCircle size={14} aria-hidden="true" />
-                  <p>Checking the portfolio…</p>
+                  <p>{t("chat.loading")}</p>
                 </div>
               )}
             </div>
 
             <form className="portfolio-chat-form" onSubmit={handleSubmit}>
-              <label className="sr-only" htmlFor="portfolio-chat-input">Ask a question about Kyaw</label>
+              <label className="sr-only" htmlFor="portfolio-chat-input">{t("chat.inputLabel")}</label>
               <textarea
                 id="portfolio-chat-input"
                 ref={inputRef}
@@ -281,15 +280,15 @@ export function ChatAssistant() {
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 onKeyDown={handleInputKeyDown}
-                placeholder="Ask about projects or skills…"
+                placeholder={t("chat.placeholder")}
                 disabled={sending}
               />
-              <button type="submit" disabled={sending || input.trim().length === 0} aria-label="Send message">
+              <button type="submit" disabled={sending || input.trim().length === 0} aria-label={t("chat.send")}>
                 <Send size={15} aria-hidden="true" />
               </button>
             </form>
             <p className="portfolio-chat-note">
-              {mode === "demo" ? "Preview answers · AI connection pending" : "Answers are limited to this portfolio"}
+              {mode === "demo" ? t("chat.demoNote") : t("chat.liveNote")}
             </p>
           </motion.section>
         )}
@@ -301,14 +300,14 @@ export function ChatAssistant() {
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
         aria-controls="portfolio-chat-dialog"
-        aria-label={open ? "Close Rim" : "Ask Rim, Kyaw's AI portfolio assistant"}
+        aria-label={open ? t("chat.close") : t("chat.trigger")}
         whileHover={reduceMotion ? undefined : { y: -2 }}
         whileTap={reduceMotion ? undefined : { scale: 0.97 }}
       >
         {open
           ? <X size={19} aria-hidden="true" />
           : <img className="portfolio-chat-trigger-avatar" src="/chat/rim-avatar.webp" alt="" width="28" height="28" aria-hidden="true" />}
-        <span>{open ? "Close" : "Ask Rim"}</span>
+        <span>{open ? t("chat.close") : t("chat.trigger")}</span>
       </motion.button>
     </div>
   );

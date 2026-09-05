@@ -1,5 +1,6 @@
 import { useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
   return (
@@ -36,6 +37,7 @@ const LEARNING = [
 ];
 
 function TechBoard() {
+  const { t } = useTranslation();
   const [active, setActive] = useState(TECH_KEYS[0]);
   const boardRef = useRef<HTMLDivElement>(null);
 
@@ -78,9 +80,9 @@ function TechBoard() {
 
   return (
     <div className="tech-board-shell" ref={boardRef} onMouseMove={moveBoard} onMouseLeave={resetBoard}>
-      <p className="tech-board-hint">Hover, focus, or tap a key</p>
+      <p className="tech-board-hint">{t("skills.hint")}</p>
       <div className="tech-board-layout">
-        <div className="tech-keyboard" aria-label="Interactive technology toolkit">
+        <div className="tech-keyboard" aria-label={t("skills.toolkit")}>
           {TECH_KEYS.map((tech) => (
             <button
               key={tech.name}
@@ -105,7 +107,7 @@ function TechBoard() {
             <img src={active.icon} alt="" aria-hidden="true" />
           </span>
           <div>
-            <p className="tech-info-label">Selected technology</p>
+            <p className="tech-info-label">{t("skills.selected")}</p>
             <h3>{active.name}</h3>
             <p>{active.context}</p>
             <span>{active.projects}</span>
@@ -117,13 +119,14 @@ function TechBoard() {
 }
 
 function LearningCarousel() {
+  const { t } = useTranslation();
   return (
     <div className="learning-orbit" aria-labelledby="learning-orbit-title">
       <div className="learning-orbit-heading">
         <span className="learning-orbit-status" aria-hidden="true" />
         <div>
-          <h3 id="learning-orbit-title">Currently Deepening</h3>
-          <p>Skills actively moving forward</p>
+          <h3 id="learning-orbit-title">{t("skills.learningTitle")}</h3>
+          <p>{t("skills.learningSubtitle")}</p>
         </div>
       </div>
       <div className="learning-orbit-scene">
@@ -142,10 +145,11 @@ function LearningCarousel() {
 }
 
 export function Skills() {
+  const { t } = useTranslation();
   return (
     <section id="skills" className="py-24 sm:py-28 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
-        <Reveal><header className="flex flex-col gap-3 mb-9"><span style={{ fontFamily: "Inter, sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(245,158,11,0.65)" }}>Capabilities</span><h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(2rem, 5vw, 2.8rem)", fontWeight: 700, color: "rgba(255,255,255,0.93)", lineHeight: 1.12 }}>Skills</h2><p style={{ fontFamily: "Inter, sans-serif", fontSize: "15px", color: "rgba(255,255,255,0.42)", lineHeight: 1.7, maxWidth: "620px" }}>Technologies I use to turn ideas into web, mobile, backend, data, and geospatial work.</p></header></Reveal>
+        <Reveal><header className="flex flex-col gap-3 mb-9"><span style={{ fontFamily: "var(--portfolio-font-sans)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(245,158,11,0.65)" }}>{t("skills.label")}</span><h2 style={{ fontFamily: "var(--portfolio-font-display)", fontSize: "clamp(2rem, 5vw, 2.8rem)", fontWeight: 700, color: "var(--portfolio-text-strong)", lineHeight: 1.12 }}>{t("skills.title")}</h2><p style={{ fontFamily: "var(--portfolio-font-sans)", fontSize: "15px", color: "var(--portfolio-text-muted)", lineHeight: 1.7, maxWidth: "620px" }}>{t("skills.intro")}</p></header></Reveal>
         <Reveal delay={0.08}><TechBoard /></Reveal>
         <Reveal delay={0.16} className="mt-10"><LearningCarousel /></Reveal>
       </div>

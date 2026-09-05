@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import { ArrowDown, MapPin, Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 function scrollTo(id: string) {
   const el = document.getElementById(id);
@@ -32,11 +33,12 @@ function OrbitDot({ angle, radius, delay, size = 3, color = "rgba(245,158,11,0.5
 
 const TECH_PILLS = ["React", "TypeScript", "Next.js", "Node.js", "PostgreSQL", "OpenAI API"];
 const OPEN_CHIPS = [
-  { label: "Open to internships", color: "emerald" },
-  { label: "Available now", color: "amber" },
+  { key: "hero.internship", color: "emerald" },
+  { key: "hero.available", color: "amber" },
 ];
 
 export function Hero() {
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Subtle particle field
@@ -117,7 +119,7 @@ export function Hero() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex flex-col overflow-hidden" aria-label="Introduction">
+    <section className="relative min-h-screen flex flex-col overflow-hidden" aria-label={t("hero.aria")}>
       {/* Canvas background */}
       <canvas
         ref={canvasRef}
@@ -137,7 +139,7 @@ export function Hero() {
         }} />
         <div style={{
           position: "absolute", bottom: 0, left: 0, right: 0, height: "25%",
-          background: "linear-gradient(to bottom, transparent, #07090f)",
+          background: "linear-gradient(to bottom, transparent, var(--portfolio-bg))",
         }} />
       </div>
 
@@ -154,10 +156,10 @@ export function Hero() {
           >
             {OPEN_CHIPS.map((chip) => (
               <span
-                key={chip.label}
+                key={chip.key}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full"
                 style={{
-                  fontFamily: "Inter, sans-serif",
+                  fontFamily: "var(--portfolio-font-sans)",
                   fontSize: "11.5px",
                   fontWeight: 500,
                   border: chip.color === "emerald"
@@ -167,8 +169,8 @@ export function Hero() {
                     ? "rgba(16,185,129,0.07)"
                     : "rgba(245,158,11,0.07)",
                   color: chip.color === "emerald"
-                    ? "rgba(52,211,153,0.85)"
-                    : "rgba(251,191,36,0.85)",
+                    ? "var(--portfolio-green-text)"
+                    : "var(--portfolio-amber-text)",
                 }}
               >
                 <span className="relative flex h-1.5 w-1.5">
@@ -181,7 +183,7 @@ export function Hero() {
                     style={{ background: chip.color === "emerald" ? "#10b981" : "#f59e0b" }}
                   />
                 </span>
-                {chip.label}
+                {t(chip.key)}
               </span>
             ))}
           </motion.div>
@@ -195,14 +197,14 @@ export function Hero() {
           >
             <MapPin size={12} style={{ color: "rgba(245,158,11,0.6)" }} />
             <span style={{
-              fontFamily: "Inter, sans-serif",
+              fontFamily: "var(--portfolio-font-sans)",
               fontSize: "12px",
               fontWeight: 500,
               color: "rgba(245,158,11,0.65)",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
             }}>
-              Mae Fah Luang University · Chiang Rai, Thailand
+              {t("hero.location")}
             </span>
           </motion.div>
 
@@ -213,15 +215,15 @@ export function Hero() {
             transition={{ duration: 0.65, delay: 0.28, ease: [0.21, 0.47, 0.32, 0.98] }}
           >
             <h1 style={{
-              fontFamily: "'Playfair Display', serif",
+              fontFamily: "var(--portfolio-font-display)",
               fontSize: "clamp(3.4rem, 9vw, 7rem)",
               fontWeight: 700,
               lineHeight: 1.02,
               letterSpacing: "-0.02em",
-              color: "rgba(255,255,255,0.94)",
+              color: "var(--portfolio-text-strong)",
               marginBottom: "0.2em",
             }}>
-              Kyaw
+              {t("hero.firstName")}
               <br />
               <span style={{
                 fontStyle: "italic",
@@ -230,7 +232,7 @@ export function Hero() {
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
               }}>
-                Hmue San.
+                {t("hero.lastName")}
               </span>
             </h1>
           </motion.div>
@@ -241,17 +243,16 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.42 }}
             style={{
-              fontFamily: "Inter, sans-serif",
+              fontFamily: "var(--portfolio-font-sans)",
               fontSize: "clamp(1rem, 2.2vw, 1.2rem)",
               fontWeight: 400,
-              color: "rgba(255,255,255,0.48)",
+              color: "var(--portfolio-text-muted)",
               lineHeight: 1.65,
               maxWidth: "440px",
               margin: "1.4rem auto 0",
             }}
           >
-            Software Engineering student interested in building clean, useful
-            web applications and growing through real-world engineering work.
+            {t("hero.intro")}
           </motion.p>
 
           {/* CTA buttons */}
@@ -265,7 +266,7 @@ export function Hero() {
               onClick={() => scrollTo("projects")}
               className="group relative overflow-hidden px-7 py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               style={{
-                fontFamily: "Inter, sans-serif",
+                fontFamily: "var(--portfolio-font-sans)",
                 fontSize: "14px",
                 fontWeight: 600,
                 background: "linear-gradient(135deg, #f59e0b, #fcd34d)",
@@ -273,21 +274,21 @@ export function Hero() {
                 boxShadow: "0 0 32px rgba(245,158,11,0.28), 0 4px 16px rgba(0,0,0,0.3)",
               }}
             >
-              View my work
+              {t("hero.work")}
             </button>
             <button
               onClick={() => scrollTo("contact")}
-              className="px-7 py-3.5 rounded-xl transition-all duration-200 hover:border-white/20 hover:bg-white/[0.04]"
+              className="portfolio-secondary-button px-7 py-3.5 rounded-xl transition-all duration-200"
               style={{
-                fontFamily: "Inter, sans-serif",
+                fontFamily: "var(--portfolio-font-sans)",
                 fontSize: "14px",
                 fontWeight: 500,
-                color: "rgba(255,255,255,0.62)",
-                border: "1px solid rgba(255,255,255,0.1)",
+                color: "var(--portfolio-text-secondary)",
+                border: "1px solid rgb(var(--portfolio-ink-rgb) / 0.1)",
                 background: "transparent",
               }}
             >
-              Get in touch
+              {t("hero.contact")}
             </button>
           </motion.div>
 
@@ -298,8 +299,8 @@ export function Hero() {
             transition={{ duration: 0.7, delay: 0.78 }}
             className="flex flex-wrap items-center justify-center gap-2 mt-12"
           >
-            <span style={{ fontFamily: "Inter, sans-serif", fontSize: "11px", color: "rgba(255,255,255,0.22)", marginRight: "4px" }}>
-              Working with
+            <span style={{ fontFamily: "var(--portfolio-font-sans)", fontSize: "11px", color: "var(--portfolio-text-faint)", marginRight: "4px" }}>
+              {t("hero.workingWith")}
             </span>
             {TECH_PILLS.map((t, i) => (
               <motion.span
@@ -308,12 +309,12 @@ export function Hero() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.82 + i * 0.06, duration: 0.3 }}
                 style={{
-                  fontFamily: "Inter, sans-serif",
+                  fontFamily: "var(--portfolio-font-sans)",
                   fontSize: "11.5px",
                   fontWeight: 450,
-                  color: "rgba(255,255,255,0.34)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  background: "rgba(255,255,255,0.025)",
+                  color: "var(--portfolio-text-muted)",
+                  border: "1px solid rgb(var(--portfolio-ink-rgb) / 0.07)",
+                  background: "rgb(var(--portfolio-ink-rgb) / 0.025)",
                   borderRadius: "6px",
                   padding: "3px 10px",
                 }}
@@ -335,16 +336,16 @@ export function Hero() {
         <button
           onClick={() => scrollTo("projects")}
           className="flex flex-col items-center gap-2 group focus:outline-none"
-          aria-label="Scroll to projects"
+          aria-label={t("hero.scrollAria")}
         >
-          <span style={{ fontFamily: "Inter, sans-serif", fontSize: "10.5px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.22)", textTransform: "uppercase" }}>
-            Scroll
+          <span style={{ fontFamily: "var(--portfolio-font-sans)", fontSize: "10.5px", letterSpacing: "0.12em", color: "var(--portfolio-text-faint)", textTransform: "uppercase" }}>
+            {t("hero.scroll")}
           </span>
           <motion.div
             animate={{ y: [0, 5, 0] }}
             transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
             className="group-hover:opacity-70 transition-opacity"
-            style={{ color: "rgba(255,255,255,0.2)" }}
+            style={{ color: "var(--portfolio-text-faint)" }}
           >
             <ArrowDown size={14} />
           </motion.div>

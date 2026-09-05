@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ElementType, ReactNode } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import {
   ArrowUpRight,
   ChevronLeft,
@@ -218,7 +219,7 @@ const ACCENT = {
   amber: {
     border: "rgba(245,158,11,0.18)",
     glow: "rgba(245,158,11,0.07)",
-    tag: { bg: "rgba(245,158,11,0.1)", border: "rgba(245,158,11,0.18)", color: "rgba(251,191,36,0.82)" },
+    tag: { bg: "rgba(245,158,11,0.1)", border: "rgba(245,158,11,0.18)", color: "var(--portfolio-amber-text)" },
     dot: "#f59e0b",
     icon: "rgba(245,158,11,0.9)",
     iconBg: "rgba(245,158,11,0.1)",
@@ -226,25 +227,25 @@ const ACCENT = {
   emerald: {
     border: "rgba(16,185,129,0.18)",
     glow: "rgba(16,185,129,0.06)",
-    tag: { bg: "rgba(16,185,129,0.1)", border: "rgba(16,185,129,0.18)", color: "rgba(52,211,153,0.82)" },
+    tag: { bg: "rgba(16,185,129,0.1)", border: "rgba(16,185,129,0.18)", color: "var(--portfolio-green-text)" },
     dot: "#10b981",
-    icon: "rgba(52,211,153,0.9)",
+    icon: "var(--portfolio-green-text)",
     iconBg: "rgba(16,185,129,0.1)",
   },
   blue: {
     border: "rgba(59,130,246,0.18)",
     glow: "rgba(59,130,246,0.06)",
-    tag: { bg: "rgba(59,130,246,0.1)", border: "rgba(59,130,246,0.18)", color: "rgba(147,197,253,0.82)" },
+    tag: { bg: "rgba(59,130,246,0.1)", border: "rgba(59,130,246,0.18)", color: "var(--portfolio-blue-text)" },
     dot: "#3b82f6",
-    icon: "rgba(147,197,253,0.9)",
+    icon: "var(--portfolio-blue-text)",
     iconBg: "rgba(59,130,246,0.1)",
   },
   violet: {
     border: "rgba(139,92,246,0.18)",
     glow: "rgba(139,92,246,0.06)",
-    tag: { bg: "rgba(139,92,246,0.1)", border: "rgba(139,92,246,0.18)", color: "rgba(196,181,253,0.82)" },
+    tag: { bg: "rgba(139,92,246,0.1)", border: "rgba(139,92,246,0.18)", color: "var(--portfolio-purple-text)" },
     dot: "#8b5cf6",
-    icon: "rgba(196,181,253,0.9)",
+    icon: "var(--portfolio-purple-text)",
     iconBg: "rgba(139,92,246,0.1)",
   },
 };
@@ -290,7 +291,7 @@ function TypewriterText({ text }: { text: string }) {
 function SectionLabel({ children }: { children: ReactNode }) {
   return (
     <span style={{
-      fontFamily: "Inter, sans-serif",
+      fontFamily: "var(--portfolio-font-sans)",
       fontSize: "11px",
       fontWeight: 600,
       letterSpacing: "0.14em",
@@ -317,11 +318,12 @@ function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; 
 }
 
 function ProjectActions({ project }: { project: Project }) {
+  const { t } = useTranslation();
   const actionClass = "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all";
   const actionStyle = {
-    fontFamily: "Inter, sans-serif",
+    fontFamily: "var(--portfolio-font-sans)",
     fontSize: "12.5px",
-    border: "1px solid rgba(255,255,255,0.08)",
+    border: "1px solid rgb(var(--portfolio-ink-rgb) / 0.08)",
   };
 
   return (
@@ -332,17 +334,17 @@ function ProjectActions({ project }: { project: Project }) {
           onClick={(e) => e.stopPropagation()}
           target="_blank"
           rel="noreferrer"
-          className={`${actionClass} hover:bg-white/[0.04]`}
-          style={{ ...actionStyle, color: "rgba(255,255,255,0.62)" }}
+          className={`${actionClass} portfolio-subtle-button`}
+          style={{ ...actionStyle, color: "var(--portfolio-text-secondary)" }}
         >
           <Github size={13} /> GitHub
         </a>
       ) : (
         <span
           className="inline-flex items-center gap-1.5 px-2 py-2"
-          style={{ fontFamily: "Inter, sans-serif", fontSize: "11.5px", color: "rgba(255,255,255,0.3)" }}
+          style={{ fontFamily: "var(--portfolio-font-sans)", fontSize: "11.5px", color: "var(--portfolio-text-muted)" }}
         >
-          <LockKeyhole size={12} /> Private project
+          <LockKeyhole size={12} /> {t("projects.private")}
         </span>
       )}
       {project.demoUrl && (
@@ -351,10 +353,10 @@ function ProjectActions({ project }: { project: Project }) {
           onClick={(e) => e.stopPropagation()}
           target="_blank"
           rel="noreferrer"
-          className={`${actionClass} hover:bg-white/[0.04]`}
-          style={{ ...actionStyle, color: "rgba(255,255,255,0.62)" }}
+          className={`${actionClass} portfolio-subtle-button`}
+          style={{ ...actionStyle, color: "var(--portfolio-text-secondary)" }}
         >
-          <ExternalLink size={13} /> Live demo
+          <ExternalLink size={13} /> {t("projects.liveDemo")}
         </a>
       )}
     </div>
@@ -370,6 +372,7 @@ function ProjectCard({
   delay: number;
   onOpen: () => void;
 }) {
+  const { t } = useTranslation();
   const a = ACCENT[project.accent];
   const Icon = project.icon;
 
@@ -380,16 +383,16 @@ function ProjectCard({
         onClick={onOpen}
         className="project-card group text-left rounded-2xl h-full w-full transition-all duration-300 hover:-translate-y-0.5 focus:outline-none"
         style={{
-          border: `1px solid ${project.featured ? a.border : "rgba(255,255,255,0.07)"}`,
-          background: `radial-gradient(ellipse 85% 55% at 0% 0%, ${project.featured ? a.glow : "transparent"}, transparent 62%), rgba(255,255,255,0.02)`,
+          border: `1px solid ${project.featured ? a.border : "rgb(var(--portfolio-ink-rgb) / 0.07)"}`,
+          background: `radial-gradient(ellipse 85% 55% at 0% 0%, ${project.featured ? a.glow : "transparent"}, transparent 62%), rgb(var(--portfolio-ink-rgb) / 0.02)`,
         }}
       >
         <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-5 h-full">
           <div
             className={`project-card-visual ${project.coverImage ? "has-cover" : ""}`}
             style={{
-              background: `radial-gradient(circle at 50% 42%, ${a.glow}, transparent 62%), rgba(255,255,255,0.018)`,
-              borderColor: project.featured ? a.border : "rgba(255,255,255,0.07)",
+              background: `radial-gradient(circle at 50% 42%, ${a.glow}, transparent 62%), rgb(var(--portfolio-ink-rgb) / 0.018)`,
+              borderColor: project.featured ? a.border : "rgb(var(--portfolio-ink-rgb) / 0.07)",
             }}
           >
             <div className="project-card-mark">
@@ -397,7 +400,7 @@ function ProjectCard({
                 <Icon size={27} style={{ color: a.icon }} />
               </span>
               <p>{project.title}</p>
-              {project.coverImage && <small>Hover to preview</small>}
+              {project.coverImage && <small>{t("projects.hoverPreview")}</small>}
             </div>
             {project.coverImage && (
               <img
@@ -419,22 +422,22 @@ function ProjectCard({
               </span>
               <div className="min-w-0">
                 <p style={{
-                  fontFamily: "Inter, sans-serif",
+                  fontFamily: "var(--portfolio-font-sans)",
                   fontSize: "10.5px",
                   fontWeight: 650,
                   letterSpacing: "0.1em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.28)",
+                  color: "var(--portfolio-text-muted)",
                 }}>
                   {project.category}
                 </p>
                 <h3
-                  className="mt-1 transition-colors group-hover:text-white"
+                  className="project-card-title mt-1 transition-colors"
                   style={{
-                    fontFamily: "Inter, sans-serif",
+                    fontFamily: "var(--portfolio-font-sans)",
                     fontSize: "17px",
                     fontWeight: 650,
-                    color: "rgba(255,255,255,0.88)",
+                    color: "var(--portfolio-text-strong)",
                     lineHeight: 1.25,
                   }}
                 >
@@ -445,15 +448,15 @@ function ProjectCard({
             <ArrowUpRight
               size={16}
               className="shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-              style={{ color: "rgba(255,255,255,0.28)" }}
+              style={{ color: "var(--portfolio-text-muted)" }}
             />
           </div>
 
           <p className="project-card-summary" style={{
-            fontFamily: "Inter, sans-serif",
+            fontFamily: "var(--portfolio-font-sans)",
             fontSize: "13.5px",
             lineHeight: 1.65,
-            color: "rgba(255,255,255,0.46)",
+            color: "var(--portfolio-text-muted)",
           }}>
             {project.summary}
           </p>
@@ -463,7 +466,7 @@ function ProjectCard({
               <span
                 key={tech}
                 style={{
-                  fontFamily: "Inter, sans-serif",
+                  fontFamily: "var(--portfolio-font-sans)",
                   fontSize: "11px",
                   fontWeight: 500,
                   background: a.tag.bg,
@@ -481,15 +484,15 @@ function ProjectCard({
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
             <ProjectActions project={project} />
             <span
-              className="inline-flex transition-colors group-hover:text-white/70"
+              className="project-card-case-link inline-flex transition-colors"
               style={{
-                fontFamily: "Inter, sans-serif",
+                fontFamily: "var(--portfolio-font-sans)",
                 fontSize: "12.5px",
                 fontWeight: 600,
-                color: "rgba(255,255,255,0.36)",
+                color: "var(--portfolio-text-muted)",
               }}
             >
-              Read Case Study
+              {t("projects.readCaseStudy")}
             </span>
           </div>
         </div>
@@ -515,26 +518,26 @@ function DetailBlock({
       transition={{ duration: 0.32, delay: index * 0.035 }}
       className="rounded-2xl p-5"
       style={{
-        border: "1px solid rgba(255,255,255,0.07)",
-        background: "rgba(255,255,255,0.025)",
+        border: "1px solid rgb(var(--portfolio-ink-rgb) / 0.07)",
+        background: "rgb(var(--portfolio-ink-rgb) / 0.025)",
       }}
     >
       <h4 style={{
-        fontFamily: "Inter, sans-serif",
+        fontFamily: "var(--portfolio-font-sans)",
         fontSize: "11px",
         fontWeight: 700,
         letterSpacing: "0.12em",
         textTransform: "uppercase",
-        color: "rgba(255,255,255,0.32)",
+        color: "var(--portfolio-text-muted)",
         marginBottom: "10px",
       }}>
         {title}
       </h4>
       <div style={{
-        fontFamily: "Inter, sans-serif",
+        fontFamily: "var(--portfolio-font-sans)",
         fontSize: "14px",
         lineHeight: 1.72,
-        color: "rgba(255,255,255,0.55)",
+        color: "var(--portfolio-text-secondary)",
       }}>
         {children}
       </div>
@@ -543,27 +546,28 @@ function DetailBlock({
 }
 
 function CaseStudyContent({ project }: { project: Project }) {
+  const { t } = useTranslation();
   const a = ACCENT[project.accent];
   const Icon = project.icon;
 
   const blocks = useMemo(() => [
     {
-      title: "Problem",
+      title: t("projects.problem"),
       content: <p>{project.sections.problem}</p>,
     },
     {
-      title: "Role",
+      title: t("projects.role"),
       content: <p>{project.sections.contribution}</p>,
     },
     {
-      title: "Architecture",
+      title: t("projects.architecture"),
       content: <p>{project.sections.architecture}</p>,
     },
     {
-      title: "Outcome",
+      title: t("projects.outcome"),
       content: <p>{project.sections.solution}</p>,
     },
-  ], [project]);
+  ], [project, t]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -576,21 +580,21 @@ function CaseStudyContent({ project }: { project: Project }) {
         </div>
         <div>
           <p style={{
-            fontFamily: "Inter, sans-serif",
+            fontFamily: "var(--portfolio-font-sans)",
             fontSize: "11px",
             fontWeight: 650,
             letterSpacing: "0.12em",
             textTransform: "uppercase",
-            color: "rgba(255,255,255,0.3)",
+            color: "var(--portfolio-text-muted)",
             marginBottom: "8px",
           }}>
             {project.category}
           </p>
           <h3 style={{
-            fontFamily: "'Playfair Display', serif",
+            fontFamily: "var(--portfolio-font-display)",
             fontSize: "clamp(1.8rem, 5vw, 2.6rem)",
             fontWeight: 700,
-            color: "rgba(255,255,255,0.94)",
+            color: "var(--portfolio-text-strong)",
             lineHeight: 1.12,
           }}>
             <TypewriterText text={project.title} />
@@ -599,10 +603,10 @@ function CaseStudyContent({ project }: { project: Project }) {
       </div>
 
       <p style={{
-        fontFamily: "Inter, sans-serif",
+        fontFamily: "var(--portfolio-font-sans)",
         fontSize: "15px",
         lineHeight: 1.75,
-        color: "rgba(255,255,255,0.5)",
+        color: "var(--portfolio-text-secondary)",
         maxWidth: "680px",
       }}>
         {project.summary}
@@ -614,7 +618,7 @@ function CaseStudyContent({ project }: { project: Project }) {
             <span
               key={tech}
               style={{
-                fontFamily: "Inter, sans-serif",
+                fontFamily: "var(--portfolio-font-sans)",
                 fontSize: "11.5px",
                 fontWeight: 550,
                 background: a.tag.bg,
@@ -651,6 +655,7 @@ function CaseStudyPanel({
   onSelect: (project: Project) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const reduceMotion = useReducedMotion();
 
@@ -665,7 +670,7 @@ function CaseStudyPanel({
         >
           <button
             type="button"
-            aria-label="Close case study"
+            aria-label={t("projects.close")}
             onClick={onClose}
             className="absolute inset-0 w-full h-full cursor-default"
             style={{ background: "rgba(0,0,0,0.48)", backdropFilter: "blur(5px)" }}
@@ -686,25 +691,25 @@ function CaseStudyPanel({
             transition={{ duration: 0.34, ease: [0.21, 0.47, 0.32, 0.98] }}
             className="absolute inset-x-2 bottom-2 h-[min(88dvh,760px)] rounded-2xl md:rounded-none md:inset-y-0 md:right-0 md:left-auto md:w-[min(860px,72vw)] md:h-auto overflow-hidden"
             style={{
-              background: "rgba(8,11,18,0.98)",
-              borderLeft: isMobile ? "none" : "1px solid rgba(255,255,255,0.08)",
+              background: "var(--portfolio-panel-bg)",
+              borderLeft: isMobile ? "none" : "1px solid rgb(var(--portfolio-ink-rgb) / 0.08)",
               boxShadow: "0 32px 90px rgba(0,0,0,0.55)",
             }}
           >
             <div className="h-full grid grid-cols-1 md:grid-cols-[230px_minmax(0,1fr)]">
               <div
                 className="hidden md:flex flex-col gap-3 p-5"
-                style={{ borderRight: "1px solid rgba(255,255,255,0.06)" }}
+                style={{ borderRight: "1px solid rgb(var(--portfolio-ink-rgb) / 0.06)" }}
               >
                 <p style={{
-                  fontFamily: "Inter, sans-serif",
+                  fontFamily: "var(--portfolio-font-sans)",
                   fontSize: "10.5px",
                   fontWeight: 700,
                   letterSpacing: "0.13em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.28)",
+                  color: "var(--portfolio-text-muted)",
                 }}>
-                  Case Studies
+                  {t("projects.caseStudies")}
                 </p>
                 {PROJECTS.map((project) => {
                   const active = project.id === selected.id;
@@ -716,29 +721,29 @@ function CaseStudyPanel({
                       onClick={() => onSelect(project)}
                       className="text-left rounded-xl p-3 transition-all"
                       style={{
-                        border: active ? `1px solid ${a.border}` : "1px solid rgba(255,255,255,0.06)",
-                        background: active ? a.tag.bg : "rgba(255,255,255,0.015)",
+                        border: active ? `1px solid ${a.border}` : "1px solid rgb(var(--portfolio-ink-rgb) / 0.06)",
+                        background: active ? a.tag.bg : "rgb(var(--portfolio-ink-rgb) / 0.015)",
                       }}
                     >
                       <span style={{
                         display: "block",
-                        fontFamily: "Inter, sans-serif",
+                        fontFamily: "var(--portfolio-font-sans)",
                         fontSize: "10px",
                         fontWeight: 650,
                         letterSpacing: "0.08em",
                         textTransform: "uppercase",
-                        color: active ? a.tag.color : "rgba(255,255,255,0.25)",
+                        color: active ? a.tag.color : "var(--portfolio-text-faint)",
                         marginBottom: "5px",
                       }}>
                         {project.category}
                       </span>
                       <span style={{
                         display: "block",
-                        fontFamily: "Inter, sans-serif",
+                        fontFamily: "var(--portfolio-font-sans)",
                         fontSize: "13px",
                         fontWeight: 600,
                         lineHeight: 1.35,
-                        color: active ? "rgba(255,255,255,0.86)" : "rgba(255,255,255,0.52)",
+                        color: active ? "var(--portfolio-text-strong)" : "var(--portfolio-text-secondary)",
                       }}>
                         {project.title}
                       </span>
@@ -750,24 +755,24 @@ function CaseStudyPanel({
               <div className="min-h-0 flex flex-col">
                 <div
                   className="flex items-center justify-between gap-3 p-4 md:p-5"
-                  style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+                  style={{ borderBottom: "1px solid rgb(var(--portfolio-ink-rgb) / 0.06)" }}
                 >
-                  <span className="md:hidden" style={{ fontFamily: "Inter, sans-serif", fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
-                    Project case study
+                  <span className="md:hidden" style={{ fontFamily: "var(--portfolio-font-sans)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--portfolio-text-muted)" }}>
+                    {t("projects.mobileTitle")}
                   </span>
                   <span className="hidden md:block" style={{
-                    fontFamily: "Inter, sans-serif",
+                    fontFamily: "var(--portfolio-font-sans)",
                     fontSize: "11px",
-                    color: "rgba(255,255,255,0.28)",
+                    color: "var(--portfolio-text-muted)",
                   }}>
-                    Click a project on the left to switch without closing this panel.
+                    {t("projects.panelHint")}
                   </span>
                   <button
                     type="button"
                     onClick={onClose}
-                    className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors hover:bg-white/[0.06]"
-                    style={{ border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.55)" }}
-                    aria-label="Close case study"
+                    className="portfolio-icon-button w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors"
+                    style={{ border: "1px solid rgb(var(--portfolio-ink-rgb) / 0.08)", color: "var(--portfolio-text-secondary)" }}
+                    aria-label={t("projects.close")}
                   >
                     <X size={16} />
                   </button>
@@ -796,6 +801,7 @@ function CaseStudyPanel({
 }
 
 export function Projects() {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<Project>(PROJECTS[0]);
   const [panelOpen, setPanelOpen] = useState(false);
   const [selectedSlide, setSelectedSlide] = useState(0);
@@ -826,30 +832,29 @@ export function Projects() {
       <div className="max-w-6xl mx-auto">
         <Reveal>
           <div className="flex flex-col gap-3 mb-10 sm:mb-14">
-            <SectionLabel>Selected work</SectionLabel>
+            <SectionLabel>{t("projects.label")}</SectionLabel>
             <h2 style={{
-              fontFamily: "'Playfair Display', serif",
+              fontFamily: "var(--portfolio-font-display)",
               fontSize: "clamp(2rem, 5vw, 2.8rem)",
               fontWeight: 700,
-              color: "rgba(255,255,255,0.93)",
+              color: "var(--portfolio-text-strong)",
               lineHeight: 1.12,
             }}>
-              Projects
+              {t("projects.title")}
             </h2>
             <p style={{
-              fontFamily: "Inter, sans-serif",
+              fontFamily: "var(--portfolio-font-sans)",
               fontSize: "15px",
-              color: "rgba(255,255,255,0.42)",
+              color: "var(--portfolio-text-muted)",
               lineHeight: 1.7,
               maxWidth: "560px",
             }}>
-              Short previews for scanning. Open a case study to inspect the problem,
-              architecture, tradeoffs, contribution, and lessons learned.
+              {t("projects.intro")}
             </p>
           </div>
         </Reveal>
 
-        <div className="project-carousel" role="region" aria-roledescription="carousel" aria-label="Selected projects">
+        <div className="project-carousel" role="region" aria-roledescription="carousel" aria-label={t("projects.title")}>
           <div className="project-carousel-viewport" ref={emblaRef}>
             <div className="project-carousel-track">
               {PROJECTS.map((project, index) => (
@@ -867,10 +872,10 @@ export function Projects() {
           </div>
 
           <div className="project-carousel-controls">
-            <button type="button" className="project-carousel-arrow" onClick={() => emblaApi?.scrollPrev()} aria-label="Previous project">
+            <button type="button" className="project-carousel-arrow" onClick={() => emblaApi?.scrollPrev()} aria-label={t("projects.previous")}>
               <ChevronLeft size={17} aria-hidden="true" />
             </button>
-            <div className="project-carousel-dots" aria-label="Choose a project">
+            <div className="project-carousel-dots" aria-label={t("projects.choose")}>
               {PROJECTS.map((project, index) => (
                 <button
                   key={project.id}
@@ -882,7 +887,7 @@ export function Projects() {
                 />
               ))}
             </div>
-            <button type="button" className="project-carousel-arrow" onClick={() => emblaApi?.scrollNext()} aria-label="Next project">
+            <button type="button" className="project-carousel-arrow" onClick={() => emblaApi?.scrollNext()} aria-label={t("projects.next")}>
               <ChevronRight size={17} aria-hidden="true" />
             </button>
           </div>
