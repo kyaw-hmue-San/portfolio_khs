@@ -152,19 +152,6 @@ body {
   color: var(--portfolio-text) !important;
 }
 
-:root[data-theme="light"] .tech-board-shell {
-  --portfolio-ink-rgb: 255 255 255;
-  --portfolio-text-strong: rgb(255 255 255 / 0.93);
-  --portfolio-text-secondary: rgb(255 255 255 / 0.62);
-  --portfolio-text-muted: rgb(255 255 255 / 0.44);
-  --portfolio-text-faint: rgb(255 255 255 / 0.28);
-  background:
-    radial-gradient(circle 210px at var(--light-x) var(--light-y), rgba(255, 255, 255, 0.075), transparent 70%),
-    radial-gradient(circle at 50% 44%, rgba(59, 130, 246, 0.09), transparent 42%),
-    radial-gradient(circle at 66% 62%, rgba(139, 92, 246, 0.07), transparent 34%),
-    #0d111c;
-}
-
 :root[data-theme="light"] .language-key-tooltip,
 :root[data-theme="light"] .learning-orbit-card {
   --portfolio-text-strong: rgb(255 255 255 / 0.93);
@@ -2606,7 +2593,7 @@ section[id] {
 @media (max-width: 379px) { .learning-grid { grid-template-columns: 1fr; gap: 16px; } }
 
 /* Keep the toolkit readable before any interaction. */
-.tech-board-shell, :root[data-theme="light"] .tech-board-shell {
+.tech-board-shell {
   min-height: 0;
   background: #0d1118;
   --portfolio-text-strong: #f1f5f9;
@@ -2652,6 +2639,44 @@ section[id] {
 /* Monochrome marks stay visible on the dark keycaps. */
 .tech-board-shell img[src$="/github.svg"],
 .tech-board-shell img[src$="/express.svg"] { filter: brightness(0) invert(1); }
+
+/* Warm ivory keycaps follow the page's light palette. */
+:root[data-theme="light"] .tech-board-shell {
+  --portfolio-text-strong: inherit;
+  --portfolio-text-secondary: inherit;
+  --portfolio-text-muted: inherit;
+  background: var(--portfolio-surface);
+  border-color: var(--portfolio-border);
+  box-shadow: 0 12px 32px rgb(65 48 24 / .06);
+}
+:root[data-theme="light"] .tech-key {
+  border-color: #d8d1c5;
+  background: #e9e3d8;
+  box-shadow: 0 5px 0 #d4cbbb, 0 7px 10px rgb(65 48 24 / .07);
+}
+:root[data-theme="light"] .tech-key-face {
+  background: linear-gradient(145deg, #ffffff, #f6f0e6);
+  box-shadow: inset 0 1px 0 #fff;
+}
+:root[data-theme="light"] .tech-key .tech-key-name { color: var(--portfolio-text-strong); }
+:root[data-theme="light"] .tech-key:is(:hover, :focus-visible, .is-selected) {
+  border-color: var(--portfolio-accent);
+  box-shadow: 0 5px 0 #d4cbbb;
+}
+:root[data-theme="light"] .tech-key.is-selected .tech-key-face {
+  background: linear-gradient(145deg, #fff9ed, #ffedc9);
+}
+:root[data-theme="light"] .tech-key:focus-visible { outline-color: var(--portfolio-accent); }
+:root[data-theme="light"] .tech-key:active { box-shadow: 0 3px 0 #d4cbbb; }
+:root[data-theme="light"] .tech-info-panel {
+  background: var(--portfolio-surface-raised);
+  border-color: var(--portfolio-border);
+  box-shadow: 0 6px 20px rgb(65 48 24 / .04);
+}
+:root[data-theme="light"] .tech-info-label { color: var(--portfolio-amber-text) !important; }
+:root[data-theme="light"] .tech-board-shell img[src$="/github.svg"],
+:root[data-theme="light"] .tech-board-shell img[src$="/express.svg"] { filter: none; }
+:root[data-theme="light"] .tech-key-trace rect { stroke: #047857; filter: none; }
 
 /* A short emerald highlight follows the edge without tinting the key face. */
 .tech-key-trace {
