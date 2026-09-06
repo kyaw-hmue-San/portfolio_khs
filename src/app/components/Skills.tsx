@@ -57,7 +57,7 @@ function TechBoard() {
               onClick={() => setActive(tech)}
             >
               <svg className="tech-key-trace" aria-hidden="true" focusable="false">
-                <rect x="1" y="1" rx="12" pathLength="100" />
+                <rect x="0" y="0" width="100%" height="100%" rx="9" pathLength="100" />
               </svg>
               <span className="tech-key-face">
                 <img className="tech-key-icon" src={tech.icon} alt="" aria-hidden="true" />

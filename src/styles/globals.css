@@ -2681,9 +2681,9 @@ section[id] {
 /* A short emerald highlight follows the edge without tinting the key face. */
 .tech-key-trace {
   position: absolute;
-  inset: -1px;
-  width: calc(100% + 2px);
-  height: calc(100% + 2px);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   overflow: visible;
   z-index: 1;
@@ -2691,8 +2691,6 @@ section[id] {
   transition: opacity 180ms ease;
 }
 .tech-key-trace rect {
-  width: calc(100% - 2px);
-  height: calc(100% - 2px);
   fill: none;
   stroke: #34d399;
   stroke-width: 1.5;
@@ -2705,8 +2703,10 @@ section[id] {
 }
 .tech-board-shell[data-animate="true"] .tech-key-trace rect { animation-play-state: running; }
 .tech-key:hover .tech-key-trace, .tech-key:focus-visible .tech-key-trace { opacity: 1; }
-@keyframes key-border-travel { to { stroke-dashoffset: -100; } }
-@media (max-width: 767px) { .tech-key-trace rect { rx: 9px; } }
+@keyframes key-border-travel {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -100; }
+}
 @media (prefers-reduced-motion: reduce) {
   .tech-key-trace { transition: none; }
   .tech-key-trace rect { animation: none; stroke-dasharray: none; opacity: .4; }
