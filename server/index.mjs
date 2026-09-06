@@ -249,7 +249,8 @@ const server = createServer(async (request, response) => {
       response.writeHead(204); response.end(); return;
     }
   }
-  if (url.pathname === "/api/health" && request.method === "GET") {
+  // Uptime monitors may use HEAD; Node omits the response body for HEAD requests.
+  if (url.pathname === "/api/health" && ["GET", "HEAD"].includes(request.method)) {
     json(response, 200, { ok: true, chatMode: API_KEY && MODEL ? "live" : "demo" });
     return;
   }
