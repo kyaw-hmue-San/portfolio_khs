@@ -67,7 +67,7 @@ export function Footer() {
           </div>
 
           {/* Back to top */}
-          <div className="flex flex-col items-start md:items-end justify-between gap-4">
+          <div className="flex flex-col items-start md:items-end">
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
               className="portfolio-subtle-button flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all focus:outline-none group"
@@ -79,9 +79,6 @@ export function Footer() {
               <ArrowUp size={13} className="group-hover:-translate-y-0.5 transition-transform" />
               {t("common.backToTop")}
             </button>
-            <p style={{ fontFamily: "var(--portfolio-font-sans)", fontSize: "12px", color: "var(--portfolio-text-faint)", textAlign: "right" }}>
-              {t("footer.note")}
-            </p>
           </div>
 
         </div>
@@ -91,9 +88,6 @@ export function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <p style={{ fontFamily: "var(--portfolio-font-sans)", fontSize: "12px", color: "var(--portfolio-text-faint)" }}>
             {t("footer.rights")}
-          </p>
-          <p style={{ fontFamily: "var(--portfolio-font-sans)", fontSize: "12px", color: "var(--portfolio-text-faint)" }}>
-            {t("footer.public")}
           </p>
         </div>
       </div>
