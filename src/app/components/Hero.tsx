@@ -277,8 +277,8 @@ export function Hero() {
               {t("hero.work")}
             </button>
             <a
-              href="/KyawHmueSan.pdf"
-              download="Kyaw-Hmue-San-Resume.pdf"
+              href="/kyawhmuesan_resume.pdf"
+              download="kyawhmuesan-resume.pdf"
               className="portfolio-secondary-button gap-2 w-full sm:w-auto min-w-40 inline-flex items-center justify-center min-h-12 px-7 py-3.5 rounded-xl transition-all duration-200"
               style={{
                 fontFamily: "var(--portfolio-font-sans)",
